@@ -49,7 +49,7 @@ def get_related_products(request, pk):
 # ==========================================
 
 # 🟢 TU TOKEN DE PRUEBA (Verificado)
-MP_ACCESS_TOKEN = "APP_USR-5972288240105156-120200-33cf9854d957759024663a68aaf5c927-3025218495"
+MP_ACCESS_TOKEN = "APP_USR-4002223461716540-120200-b3ca03a7f86ff3bc6ed70a4e66f0c4c1-1331103831"
 
 @api_view(['POST'])
 def create_preference(request):
