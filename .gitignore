@@ -1,0 +1,12 @@
+# Ignorar carpetas pesadas de Python
+venv/
+__pycache__/
+*.pyc
+.env
+db.sqlite3
+
+# Ignorar carpetas pesadas de React
+node_modules/
+dist/
+build/
+.DS_Store

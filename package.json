@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@mercadopago/sdk-react": "^1.0.6",
+    "mercadopago": "^2.11.0"
+  }
+}
