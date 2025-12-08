@@ -10,7 +10,7 @@ function CartPage() {
   const handlePayment = async () => {
     setIsProcessing(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/create_preference/', {
+      const response = await fetch('https://danstore-backend.onrender.com/api/create_preference/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: cart }),
@@ -49,7 +49,7 @@ function CartPage() {
             <div className="lg:col-span-2 space-y-4">
                 {cart.map((item, i) => (
                     <div key={i} className="bg-white p-6 rounded-xl flex gap-4">
-                        <img src={`http://127.0.0.1:8000${item.image}`} className="w-20 h-20 object-cover rounded"/>
+                        <img src={`https://danstore-backend.onrender.com${item.image}`} className="w-20 h-20 object-cover rounded"/>
                         <div>
                             <h3 className="font-bold">{item.name}</h3>
                             <p>S/ {item.price}</p>

@@ -19,11 +19,11 @@ function Home() {
 
   // --- 1. CARGA INICIAL DE DATOS ---
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/categories/')
+    fetch('https://danstore-backend.onrender.com/api/categories/')
       .then(res => res.json())
       .then(data => setCategories(data));
 
-    fetch('http://127.0.0.1:8000/api/brands/')
+    fetch('https://danstore-backend.onrender.com/api/brands/')
       .then(res => res.json())
       .then(data => setAvailableBrands(data));
   }, [])
@@ -84,7 +84,7 @@ function Home() {
     
     selectedBrands.forEach(brand => params.append('brand', brand));
 
-    fetch(`http://127.0.0.1:8000/api/products/?${params.toString()}`)
+    fetch(`https://danstore-backend.onrender.com/api/products/?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         setProducts(data)
@@ -217,7 +217,7 @@ function Home() {
                             </span>
 
                             <div className="aspect-square bg-gray-100 mb-4 overflow-hidden rounded-md">
-                                <img src={`http://127.0.0.1:8000${product.image}`} alt={product.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"/>
+                                <img src={`https://danstore-backend.onrender.com${product.image}`} alt={product.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"/>
                             </div>
 
                             <div>

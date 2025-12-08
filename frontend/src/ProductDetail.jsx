@@ -42,12 +42,12 @@ function ProductDetail() {
 
   // 2. Carga de Producto Principal
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/products/${id}/`)
+    fetch(`https://danstore-backend.onrender.com/api/products/${id}/`)
       .then(res => res.json())
       .then(data => {
         setProduct(data);
         if (data.image) {
-            setMainImageUrl(`http://127.0.0.1:8000${data.image}`);
+            setMainImageUrl(`https://danstore-backend.onrender.com${data.image}`);
         }
       });
   }, [id]);
@@ -55,7 +55,7 @@ function ProductDetail() {
   // 3. Carga de Recomendaciones
   useEffect(() => {
     if (product && product.id) {
-        fetch(`http://127.0.0.1:8000/api/recommendations/${product.id}/`)
+        fetch(`https://danstore-backend.onrender.com/api/recommendations/${product.id}/`)
             .then(res => res.json())
             .then(data => {
                 setRecommendations(Array.isArray(data) ? data : []); 
@@ -141,11 +141,11 @@ function ProductDetail() {
                     {[product.image, ...galleryImages.map(img => img.image)].map((imgUrl, index) => (
                          <div 
                             key={index}
-                            onClick={() => setMainImageUrl(`http://127.0.0.1:8000${imgUrl}`)}
+                            onClick={() => setMainImageUrl(`https://danstore-backend.onrender.com${imgUrl}`)}
                             className={`w-20 h-20 border cursor-pointer overflow-hidden rounded-md flex items-center justify-center transition-colors ${mainImageUrl.includes(imgUrl) ? 'border-2 border-black' : 'border-gray-200 hover:border-gray-400'}`}
                         >
                             <img 
-                                src={`http://127.0.0.1:8000${imgUrl}`} 
+                                src={`https://danstore-backend.onrender.com${imgUrl}`} 
                                 alt={`Thumbnail ${index}`} 
                                 className="w-full h-full object-cover"
                             />
@@ -204,12 +204,12 @@ function ProductDetail() {
                             <div 
                                 key={img.image}
                                 onClick={() => {
-                                    setMainImageUrl(`http://127.0.0.1:8000${img.image}`);
+                                    setMainImageUrl(`https://danstore-backend.onrender.com${img.image}`);
                                     setSelectedColor('Variante'); 
                                 }}
                                 className={`w-12 h-12 border cursor-pointer overflow-hidden rounded-md transition-colors p-0.5 ${mainImageUrl.includes(img.image) ? 'border-2 border-black' : 'border-gray-300 hover:border-gray-400'}`}
                             >
-                                <img src={`http://127.0.0.1:8000${img.image}`} alt="Swatch" className="w-full h-full object-cover rounded-sm"/>
+                                <img src={`https://danstore-backend.onrender.com${img.image}`} alt="Swatch" className="w-full h-full object-cover rounded-sm"/>
                             </div>
                         )) : (
                             <span className="w-12 h-12 border border-gray-400 bg-yellow-100 rounded-md cursor-pointer flex items-center justify-center text-xs" onClick={() => setSelectedColor('Amarillo')}>A/M</span>
@@ -279,7 +279,7 @@ function ProductDetail() {
                             )}
 
                             <div className="aspect-square bg-gray-100 mb-3 overflow-hidden rounded-md">
-                                <img src={`http://127.0.0.1:8000${rec.image}`} alt={rec.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                <img src={`https://danstore-backend.onrender.com${rec.image}`} alt={rec.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                             </div>
                             <p className="text-xs text-gray-500 uppercase font-bold">{rec.brand}</p>
                             <p className="text-sm font-medium text-gray-800 h-8 overflow-hidden">{rec.name}</p>

@@ -17,7 +17,7 @@ function Navbar() {
   useEffect(() => {
     if (searchTerm.length > 1) {
       const timer = setTimeout(() => {
-        fetch(`http://127.0.0.1:8000/api/products/?search=${searchTerm}`)
+        fetch(`https://danstore-backend.onrender.com/api/products/?search=${searchTerm}`)
           .then(res => res.json())
           .then(data => {
             setSuggestions(data.slice(0, 5));
@@ -88,7 +88,7 @@ function Navbar() {
                             }}
                             className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
                         >
-                            <img src={`http://127.0.0.1:8000${prod.image}`} className="w-10 h-10 object-cover rounded-lg bg-gray-200"/>
+                            <img src={`https://danstore-backend.onrender.com${prod.image}`} className="w-10 h-10 object-cover rounded-lg bg-gray-200"/>
                             <div>
                                 <p className="font-semibold text-gray-900 text-sm">{prod.name}</p>
                                 <p className="text-xs text-gray-500">Dan Store</p>
