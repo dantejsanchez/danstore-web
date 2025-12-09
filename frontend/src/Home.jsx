@@ -30,50 +30,44 @@ function Home() {
 
   // --- 2. MANEJADORES DE CLIC (Funciones) ---
   
-  // Función para manejar el clic en Servicios (Checkboxes)
   const handleBrandChange = (brand) => {
     const newParams = new URLSearchParams(searchParams);
-    
     if (selectedBrands.includes(brand)) {
-        // Desmarcar: Crea una nueva lista sin la marca
         const keptBrands = selectedBrands.filter(b => b !== brand);
         newParams.delete('brand');
         keptBrands.forEach(b => newParams.append('brand', b));
     } else {
-        // Marcar: Agrega la marca
         newParams.append('brand', brand);
     }
     setSearchParams(newParams);
   };
 
-  // Función para manejar el cambio de precio (Radio Buttons)
   const handleSortChange = (orderType) => {
     const newParams = new URLSearchParams(searchParams);
     if (orderType === ordering) {
-        newParams.delete('ordering'); // Si le das click al mismo, lo desactiva
+        newParams.delete('ordering');
     } else {
         newParams.set('ordering', orderType);
     }
     setSearchParams(newParams);
   }
 
-  // Función para manejar el clic en Categorías
   const handleCategoryClick = (id) => {
     const newParams = new URLSearchParams(searchParams);
     if (categoryId == id) {
-        newParams.delete('category'); // Si ya estaba, lo desactiva
+        newParams.delete('category');
     } else {
-        newParams.set('category', id); // Setea la nueva categoría
-        newParams.delete('search'); // Limpia la búsqueda de texto si cambiamos de categoría
+        newParams.set('category', id);
+        newParams.delete('search');
     }
     setSearchParams(newParams);
   }
 
   const handleReset = () => {
-    setSearchParams({}); // Borra todos los filtros de la URL
+    setSearchParams({});
   }
 
-  // --- 3. CARGA DE PRODUCTOS (Responde a todos los filtros) ---
+  // --- 3. CARGA DE PRODUCTOS ---
   useEffect(() => {
     setLoading(true);
     
@@ -112,17 +106,17 @@ function Home() {
 
         <div className="flex gap-8">
             
-            {/* --- SIDEBAR IZQUIERDO (CONECTADO) --- */}
+            {/* --- SIDEBAR IZQUIERDO --- */}
             <aside className="w-64 hidden lg:block flex-shrink-0">
                 
-                {/* 1. Categorías (AHORA FUNCIONAL) */}
+                {/* 1. Categorías */}
                 <div className="bg-white p-5 rounded-lg shadow-sm mb-4 border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-3 text-lg">Categorías</h3>
                     <ul className="space-y-2 text-sm text-gray-600">
                         {categories.map((cat) => (
                             <li key={cat.id}>
                                 <button 
-                                    onClick={() => handleCategoryClick(cat.id)} // <--- CLICK A LA FUNCIÓN
+                                    onClick={() => handleCategoryClick(cat.id)}
                                     className={`block w-full text-left hover:text-black hover:font-bold transition ${categoryId == cat.id ? 'font-bold text-black' : ''}`}
                                 >
                                     {cat.name}
@@ -132,7 +126,7 @@ function Home() {
                     </ul>
                 </div>
 
-                {/* 2. Servicios / Filtro de Marcas (AHORA FUNCIONAL) */}
+                {/* 2. Servicios / Filtro de Marcas */}
                 <div className="bg-white p-5 rounded-lg shadow-sm mb-4 border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-3 text-lg">Servicios</h3>
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
@@ -141,7 +135,7 @@ function Home() {
                                 <input 
                                     type="checkbox" 
                                     checked={selectedBrands.includes(brand)}
-                                    onChange={() => handleBrandChange(brand)} // <--- ON CHANGE A LA FUNCIÓN
+                                    onChange={() => handleBrandChange(brand)}
                                     className="rounded border-gray-300 text-black focus:ring-black cursor-pointer"
                                 />
                                 <span className={`text-sm group-hover:text-black transition ${selectedBrands.includes(brand) ? 'text-black font-bold' : 'text-gray-600'}`}>
@@ -154,32 +148,28 @@ function Home() {
                     </div>
                 </div>
 
-                 {/* 3. Precio / Ordenamiento (MANTENEMOS FUNCIONAL) */}
+                 {/* 3. Precio / Ordenamiento */}
                  <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-3 text-lg">Precio</h3>
                     <div className="space-y-3">
-                        
-                        {/* Opción Menor a Mayor */}
                         <label className="flex items-center gap-2 cursor-pointer group">
                             <input 
                                 type="radio" 
                                 name="price_sort"
                                 checked={ordering === 'min_price'}
-                                onChange={() => handleSortChange('min_price')} // <--- ON CHANGE A LA FUNCIÓN
+                                onChange={() => handleSortChange('min_price')}
                                 className="text-black focus:ring-black cursor-pointer"
                             />
                             <span className={`text-sm group-hover:text-black transition ${ordering === 'min_price' ? 'text-black font-bold' : 'text-gray-600'}`}>
                                 Menor a Mayor
                             </span>
                         </label>
-
-                        {/* Opción Mayor a Menor */}
                         <label className="flex items-center gap-2 cursor-pointer group">
                             <input 
                                 type="radio" 
                                 name="price_sort"
                                 checked={ordering === 'max_price'}
-                                onChange={() => handleSortChange('max_price')} // <--- ON CHANGE A LA FUNCIÓN
+                                onChange={() => handleSortChange('max_price')}
                                 className="text-black focus:ring-black cursor-pointer"
                             />
                             <span className={`text-sm group-hover:text-black transition ${ordering === 'max_price' ? 'text-black font-bold' : 'text-gray-600'}`}>
@@ -208,43 +198,52 @@ function Home() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {products.map((product) => (
-                        <Link to={`/product/${product.id}`} key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all p-4 relative group border border-transparent hover:border-gray-200">
-                            
-                            {/* Sticker Oferta */}
-                            <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded z-10">
-                                BLACK FRIDAY
-                            </span>
+                        {products.map((product) => {
+                            // 🔴 CORRECCIÓN IMPORTANTE: Si es link de Cloudinary, no agregar backendUrl
+                            const imageUrl = product.image.startsWith('http') 
+                                ? product.image 
+                                : `https://danstore-backend.onrender.com${product.image}`;
 
-                            <div className="aspect-square bg-gray-100 mb-4 overflow-hidden rounded-md">
-                                <img src={`https://danstore-backend.onrender.com${product.image}`} alt={product.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"/>
-                            </div>
-
-                            <div>
-                                <p className="text-xs text-gray-500 font-bold uppercase mb-1">{product.brand}</p>
-                                <h3 className="text-sm text-gray-700 font-medium leading-tight mb-2 h-10 overflow-hidden">{product.name}</h3>
-                                
-                                {product.original_price && (
-                                    <div className="text-xs text-gray-400 line-through">
-                                        S/ {product.original_price}
-                                    </div>
-                                )}
-                                
-                                <div className="flex items-center gap-2">
-                                    <span className="text-lg font-bold text-red-600">S/ {product.price}</span>
-                                    {product.original_price && (
-                                        <span className="text-xs font-bold text-red-600 bg-red-100 px-1 rounded">-30%</span>
-                                    )}
-                                </div>
-
-                                <div className="mt-2 flex items-center gap-1">
-                                    <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded border border-green-100">
-                                        Llega mañana
+                            return (
+                                <Link to={`/product/${product.id}`} key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all p-4 relative group border border-transparent hover:border-gray-200">
+                                    <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded z-10">
+                                        BLACK FRIDAY
                                     </span>
-                                </div>
-                            </div>
-                        </Link>
-                        ))}
+
+                                    <div className="aspect-square bg-gray-100 mb-4 overflow-hidden rounded-md">
+                                        <img 
+                                            src={imageUrl} 
+                                            alt={product.name} 
+                                            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-bold uppercase mb-1">{product.brand}</p>
+                                        <h3 className="text-sm text-gray-700 font-medium leading-tight mb-2 h-10 overflow-hidden">{product.name}</h3>
+                                        
+                                        {product.original_price && (
+                                            <div className="text-xs text-gray-400 line-through">
+                                                 S/ {product.original_price}
+                                            </div>
+                                        )}
+                                        
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-lg font-bold text-red-600">S/ {product.price}</span>
+                                            {product.original_price && (
+                                                <span className="text-xs font-bold text-red-600 bg-red-100 px-1 rounded">-30%</span>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-2 flex items-center gap-1">
+                                            <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded border border-green-100">
+                                                Llega mañana
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
             </main>
