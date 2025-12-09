@@ -110,17 +110,19 @@ USE_TZ = True
 
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS (WhiteNoise)
+# 5. ARCHIVOS ESTÁTICOS (CORREGIDO)
 # ==========================================
 
 STATIC_URL = '/static/'
-
-# Esto asegura que collectstatic funcione en el build
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Lógica corregida: Definimos el almacenamiento SIEMPRE
 if not DEBUG:
-    # Compresión para producción
+    # Producción (Render): Usamos WhiteNoise con compresión
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    # Desarrollo (DEBUG=True): Usamos el estándar de Django
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
