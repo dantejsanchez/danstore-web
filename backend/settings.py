@@ -111,7 +111,7 @@ USE_TZ = True
 
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS Y MULTIMEDIA (CORREGIDO)
+# 5. ARCHIVOS ESTÁTICOS Y MULTIMEDIA (SOLUCIÓN DEFINITIVA)
 # ==========================================
 
 STATIC_URL = '/static/'
@@ -119,28 +119,27 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Credenciales de Cloudinary
+# Credenciales de Cloudinary (Se mantienen igual)
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-# --- SOLUCIÓN AL ERROR DEL RENDER ---
-# Definimos STORAGES (Para Django 5)
+# --- AJUSTE PARA QUE NO FALLE EL BUILD ---
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # CAMBIO CLAVE: Quitamos 'Manifest' para evitar el error MissingFileError
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
-# Definimos TAMBIÉN las variables viejas (Para que la librería no falle)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Variable antigua sincronizada con la nueva (sin Manifest)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
 
 # ==========================================
 # 6. CORS & REST FRAMEWORK
