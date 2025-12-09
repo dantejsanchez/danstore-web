@@ -11,13 +11,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ==========================================
-# 1. CONFIGURACIÓN DE SEGURIDAD
+# 1. CONFIGURACIÓN DE SEGURIDAD (PRODUCCIÓN)
 # ==========================================
 
+# Lee la clave secreta de la nube, o usa la local por defecto
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# AJUSTE AUTOMÁTICO: Si estamos en Render, DEBUG se apaga solo.
-DEBUG = 'RENDER' not in os.environ
+# Si estamos en RENDER, Debug será False (Seguro). En tu PC será True.
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -27,15 +28,14 @@ ALLOWED_HOSTS = ['*']
 # ==========================================
 
 INSTALLED_APPS = [
-    'cloudinary_storage',           # <--- OBLIGATORIO: Siempre arriba
-    'django.contrib.staticfiles',   # <--- Staticfiles (Orden estándar)
-    'cloudinary',                   # <--- OBLIGATORIO
-    
+    'cloudinary_storage',       # <--- OBLIGATORIO: Agrega esto
+    'cloudinary',               # <--- OBLIGATORIO: Agrega esto
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     
     # Apps de Terceros
     'rest_framework',
@@ -48,9 +48,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', 
+    'corsheaders.middleware.CorsMiddleware', # Siempre el primero
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Vital para Render
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Vital para imágenes en Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,9 +80,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # ==========================================
-# 3. BASE DE DATOS
+# 3. BASE DE DATOS (HÍBRIDA)
 # ==========================================
 
+# En tu PC usa SQLite. En Render usa PostgreSQL automáticamente.
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
@@ -109,13 +110,36 @@ USE_TZ = True
 
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS Y CLOUDINARY (SOLUCIÓN)
+# 5. ARCHIVOS ESTÁTICOS (CORREGIDO)
 # ==========================================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Lógica corregida: Definimos el almacenamiento SIEMPRE
+if not DEBUG:
+    # Producción (Render): Usamos WhiteNoise con compresión
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    # Desarrollo (DEBUG=True): Usamos el estándar de Django
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ==========================================
+# 6. CORS (CONEXIÓN CON REACT)
+# ==========================================
+
+# Permitir todo para evitar errores en el primer despliegue
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+# ==========================================
+# 7. MULTIMEDIA (FOTOS)
+# ==========================================
+# Configuración OBLIGATORIA de Cloudinary (Sin if ni else)
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
@@ -123,29 +147,14 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-# --- AQUÍ ESTÁ EL ARREGLO ---
-# Usamos "CompressedStaticFilesStorage" (Sin Manifest) para que NO falle el build.
-# Definimos "STORAGES" para Django 5 Y las variables viejas para compatibilidad.
-
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
-}
-
-# Mantener esto para que las librerías viejas no den error
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# Estas rutas siguen siendo necesarias para que Django sepa manejarlo
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # ==========================================
-# 6. CORS & REST FRAMEWORK
+# 8. REST FRAMEWORK & JWT
 # ==========================================
-
-CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -163,5 +172,3 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
