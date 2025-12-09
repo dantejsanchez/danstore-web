@@ -25,21 +25,18 @@ def register_user(request):
 def get_products(request):
     queryset = Product.objects.filter(is_active=True)
     
-    # 1. Búsqueda por texto
-    if request.GET.get('search'): 
-        queryset = queryset.filter(name__icontains=request.GET.get('search'))
+    # Filtros que ya tenías
+    if request.GET.get('search'): queryset = queryset.filter(name__icontains=request.GET.get('search'))
+    if request.GET.get('category'): queryset = queryset.filter(category_id=request.GET.get('category'))
     
-    # 2. Filtro por Categoría
-    if request.GET.get('category'): 
-        queryset = queryset.filter(category_id=request.GET.get('category'))
-        
-    # 3. ORDENAMIENTO (ESTO FALTABA) 🔴
+    # --- AGREGA SOLO ESTO AQUÍ ---
     ordering = request.GET.get('ordering')
     if ordering == 'min_price':
-        queryset = queryset.order_by('price')  # Ascendente (Barato a Caro)
+        queryset = queryset.order_by('price')
     elif ordering == 'max_price':
-        queryset = queryset.order_by('-price') # Descendente (Caro a Barato)
-        
+        queryset = queryset.order_by('-price')
+    # -----------------------------
+
     return Response(ProductSerializer(queryset, many=True).data)
 
 @api_view(['GET'])
@@ -62,6 +59,7 @@ def get_related_products(request, pk):
 # 3. PAGOS (MODO DEBUG - SIN CRASH)
 # ==========================================
 
+# 🟢 TU TOKEN DE PRUEBA (Verificado)
 MP_ACCESS_TOKEN = "APP_USR-4002223461716540-120200-b3ca03a7f86ff3bc6ed70a4e66f0c4c1-1331103831"
 
 @api_view(['POST'])
@@ -71,11 +69,14 @@ def create_preference(request):
         cart_items = request.data.get('items', [])
         items_list = []
 
+        # 1. LIMPIEZA DE DATOS (Vital)
+        # Convertimos a float e int aquí para que no falle aunque el frontend envíe texto
         for item in cart_items:
             try:
                 precio_final = float(item['price'])
                 cantidad_final = int(item.get('quantity', 1))
             except ValueError:
+                print(f"❌ Dato inválido en producto: {item}")
                 return Response({'error': 'Precio o cantidad inválidos'}, status=400)
 
             items_list.append({
@@ -85,8 +86,11 @@ def create_preference(request):
                 "currency_id": "PEN"
             })
 
+        # 2. CONFIGURACIÓN SIMPLE
         preference_data = {
             "items": items_list,
+            # Quitamos auto_return temporalmente para ver si es la causa del bloqueo
+            # "auto_return": "approved", 
             "back_urls": {
                 "success": "http://localhost:5173/success",
                 "failure": "http://localhost:5173/failure",
@@ -96,15 +100,26 @@ def create_preference(request):
             "external_reference": "PRUEBA-001"
         }
 
+        # 3. CREACIÓN Y ANÁLISIS DE RESPUESTA
         print("🔵 Enviando a Mercado Pago...")
         preference_response = sdk.preference().create(preference_data)
         preference = preference_response["response"]
 
+        # 🚨 AQUÍ ESTÁ EL CAMBIO CRÍTICO 🚨
+        # Verificamos si Mercado Pago aceptó (Status 201) ANTES de pedir el link.
         status_mp = preference_response.get("status")
         
         if status_mp not in [200, 201]:
+            print("\n========================================")
+            print("❌ MERCADO PAGO RECHAZÓ LA SOLICITUD:")
+            print(f"Status: {status_mp}")
+            print("MENSAJE EXACTO:", preference) # <-- ESTO NOS DIRÁ EL ERROR
+            print("========================================\n")
+            # Devolvemos el error al frontend para que no se quede cargando
             return Response(preference, status=400)
 
+        # Si pasamos el filtro, el link existe seguro
+        print(f"✅ ÉXITO: Link generado -> {preference['init_point']}")
         return Response({'init_point': preference['init_point']})
 
     except Exception as e:
