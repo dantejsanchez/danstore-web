@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# Si estamos en Render, DEBUG es False. En local es True.
+# AJUSTE AUTOMÁTICO: Si estamos en Render, DEBUG se apaga solo.
 DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ['*']
@@ -27,12 +27,10 @@ ALLOWED_HOSTS = ['*']
 # ==========================================
 
 INSTALLED_APPS = [
-    # Cloudinary apps
-    'cloudinary_storage',
-    'django.contrib.staticfiles',
-    'cloudinary',
+    'cloudinary_storage',           # <--- OBLIGATORIO: Siempre arriba
+    'django.contrib.staticfiles',   # <--- Staticfiles (Orden estándar)
+    'cloudinary',                   # <--- OBLIGATORIO
     
-    # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -111,7 +109,7 @@ USE_TZ = True
 
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS Y MULTIMEDIA (SOLUCIÓN DEFINITIVA)
+# 5. ARCHIVOS ESTÁTICOS Y CLOUDINARY (SOLUCIÓN)
 # ==========================================
 
 STATIC_URL = '/static/'
@@ -119,27 +117,29 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Credenciales de Cloudinary (Se mantienen igual)
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-# --- AJUSTE PARA QUE NO FALLE EL BUILD ---
+# --- AQUÍ ESTÁ EL ARREGLO ---
+# Usamos "CompressedStaticFilesStorage" (Sin Manifest) para que NO falle el build.
+# Definimos "STORAGES" para Django 5 Y las variables viejas para compatibilidad.
+
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        # CAMBIO CLAVE: Quitamos 'Manifest' para evitar el error MissingFileError
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
-# Variable antigua sincronizada con la nueva (sin Manifest)
+# Mantener esto para que las librerías viejas no den error
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 
 # ==========================================
 # 6. CORS & REST FRAMEWORK
