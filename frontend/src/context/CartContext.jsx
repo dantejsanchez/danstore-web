@@ -5,18 +5,18 @@ const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  // Inicializamos el carrito leyendo de localStorage
+  // 1. Inicializar desde LocalStorage
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // Efecto para guardar en localStorage
+  // 2. Guardar cambios automáticamente
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // 🛡️ TU FUNCIÓN ORIGINAL (Agrega o suma)
+  // 3. Agregar al carrito (Sanitizando números)
   const addToCart = (product, quantity = 1) => {
     setCart(currentCart => {
       const existingItem = currentCart.find(item => item.id === product.id);
@@ -34,9 +34,9 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // ✅ NUEVA FUNCIÓN NECESARIA (Para los botones + y - del carrito)
+  // 4. Actualizar cantidad directa (+ / -)
   const updateQuantity = (id, newQuantity) => {
-    if (newQuantity < 1) return; // Evita cantidades negativas
+    if (newQuantity < 1) return; 
     setCart(currentCart =>
       currentCart.map(item =>
         item.id === id ? { ...item, quantity: parseInt(newQuantity) } : item
@@ -44,20 +44,17 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // TU FUNCIÓN ORIGINAL
+  // 5. Eliminar
   const removeFromCart = (id) => {
     setCart(currentCart => currentCart.filter(item => item.id !== id));
   };
 
-  const clearCart = () => {
-    setCart([]);
-  };
+  const clearCart = () => setCart([]);
 
-  // TU CÁLCULO DE TOTAL
+  // 6. Total Calculado
   const total = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
 
   return (
-    // Agregamos updateQuantity al value
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity, total }}>
       {children}
     </CartContext.Provider>
