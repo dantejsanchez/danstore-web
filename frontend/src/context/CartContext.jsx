@@ -5,23 +5,21 @@ const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  // Inicializamos el carrito leyendo de localStorage para no perder datos al recargar
+  // Inicializamos el carrito leyendo de localStorage
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // Cada vez que el carrito cambie, actualizamos localStorage y calculamos total
+  // Efecto para guardar en localStorage
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // 🛡️ BLINDAJE 2: Función para agregar sanitizando datos
+  // 🛡️ TU FUNCIÓN ORIGINAL (Agrega o suma)
   const addToCart = (product, quantity = 1) => {
     setCart(currentCart => {
       const existingItem = currentCart.find(item => item.id === product.id);
-      
-      // Aseguramos que el precio sea un número limpio
       const cleanPrice = parseFloat(product.price); 
 
       if (existingItem) {
@@ -36,6 +34,17 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  // ✅ NUEVA FUNCIÓN NECESARIA (Para los botones + y - del carrito)
+  const updateQuantity = (id, newQuantity) => {
+    if (newQuantity < 1) return; // Evita cantidades negativas
+    setCart(currentCart =>
+      currentCart.map(item =>
+        item.id === id ? { ...item, quantity: parseInt(newQuantity) } : item
+      )
+    );
+  };
+
+  // TU FUNCIÓN ORIGINAL
   const removeFromCart = (id) => {
     setCart(currentCart => currentCart.filter(item => item.id !== id));
   };
@@ -44,11 +53,12 @@ export const CartProvider = ({ children }) => {
     setCart([]);
   };
 
-  // Calculamos el total asegurándonos de que sean números
+  // TU CÁLCULO DE TOTAL
   const total = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, total }}>
+    // Agregamos updateQuantity al value
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity, total }}>
       {children}
     </CartContext.Provider>
   );
