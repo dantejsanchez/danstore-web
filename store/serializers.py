@@ -40,13 +40,13 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
 
-class ProductSerializer(serializers.ModelSerializer):
-    # 🛡️ BLINDAJE 1: Aseguramos que el precio salga como número flotante, no texto
-    price = serializers.FloatField() 
+# store/serializers.py
 
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
+        # Asegúrate de incluir 'is_black_friday' o usa '__all__'
+        fields = ['id', 'name', 'brand', 'image', 'price', 'original_price', 'category', 'is_black_friday']
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
