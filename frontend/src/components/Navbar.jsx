@@ -8,7 +8,7 @@ function Navbar() {
   const { user, logoutUser } = useAuth();
   const navigate = useNavigate(); 
   
-  // --- LÓGICA DEL BUSCADOR ---
+  // --- LÓGICA DEL BUSCADOR (INTACTA) ---
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -63,26 +63,35 @@ function Navbar() {
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    // NAVBAR: Glassmorphism limpio (Blanco/Transparente)
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-transparent ${scrolled ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-2' : 'bg-[#D9D9D9] border-gray-100 py-3'}`}>
+    // CAMBIO AQUÍ: 
+    // Antes: 'bg-[#D9D9D9]' (Gris sólido feo)
+    // Ahora: 'bg-gray-100/50 backdrop-blur-sm' (Gris sutil translúcido profesional)
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-transparent 
+        ${scrolled 
+            ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-2' 
+            : 'bg-gray-100/50 backdrop-blur-sm border-gray-100 py-3'
+        }`
+    }>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="flex justify-between items-center gap-8 h-12">
           
-          {/* 1. MARCA (Ahora sobria en Negro/Gris) */}
+          {/* 1. MARCA */}
           <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
              <span className="text-2xl font-bold text-gray-900 tracking-tighter">
                Dan<span className="text-gray-500">Shop</span>
              </span>
           </Link>
 
-          {/* 2. BUSCADOR INTELIGENTE (Neutro) */}
+          {/* 2. BUSCADOR */}
           <div className="flex-1 max-w-2xl relative hidden md:block">
             <div className="relative group">
                 <input 
                   type="text" 
                   placeholder="Busca tu detalle favorito" 
-                  className="w-full bg-white/80 border border-transparent focus:border-gray-300 focus:bg-white rounded-full py-2 pl-12 pr-4 text-sm transition-all outline-none shadow-sm focus:ring-4 focus:ring-gray-100"
+                  // Ajuste sutil: Fondo blanco translúcido al inicio para mejor contraste
+                  className={`w-full border-transparent focus:border-gray-300 focus:bg-white rounded-full py-2 pl-12 pr-4 text-sm transition-all outline-none shadow-sm focus:ring-4 focus:ring-gray-100 
+                    ${scrolled ? 'bg-gray-100' : 'bg-white/80'}`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -115,21 +124,19 @@ function Navbar() {
             )}
           </div>
 
-          {/* 3. ICONOS DERECHA (Negro y Gris) */}
+          {/* 3. ICONOS DERECHA */}
           <div className="flex items-center space-x-6">
             
-            {/* LÓGICA DE USUARIO */}
+            {/* USUARIO */}
             {user ? (
                 <div className="relative">
                     <button 
                         onClick={() => setShowUserMenu(!showUserMenu)}
                         className="flex items-center gap-3 hover:bg-black/5 px-2 py-1.5 rounded-full transition-all duration-200"
                     >
-                        {/* Avatar Negro/Blanco (Más elegante) */}
                         <div className="h-8 w-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm shadow-sm">
                             {getUserInitial()}
                         </div>
-                        
                         <div className="text-left hidden lg:block">
                             <p className="text-[10px] text-gray-500 font-bold uppercase leading-none">Hola</p>
                             <p className="text-sm font-bold text-gray-900 leading-none mt-0.5 max-w-[100px] truncate">
@@ -138,14 +145,12 @@ function Navbar() {
                         </div>
                     </button>
 
-                    {/* Menú Desplegable */}
                     {showUserMenu && (
                         <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 overflow-hidden z-50 animate-fade-in-up">
                             <div className="px-5 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <p className="text-xs text-gray-500 font-medium">Conectado como</p>
                                 <p className="text-sm font-bold text-[#1d1d1f] truncate">{user.email}</p>
                             </div>
-                            
                             <div className="py-1">
                                 <Link to="/catalogo" className="block px-5 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">
                                     Ir al catálogo
@@ -154,7 +159,6 @@ function Navbar() {
                                     Mis Pedidos
                                 </button>
                             </div>
-
                             <div className="border-t border-gray-100 mt-1 pt-1">
                                 <button 
                                     onClick={() => {
@@ -179,6 +183,7 @@ function Navbar() {
                 </Link>
             )}
 
+            {/* CARRITO */}
             <Link to="/cart" className="relative group">
               <div className="flex items-center justify-center w-10 h-10 bg-white border border-gray-200 rounded-full hover:border-black hover:text-black transition-all duration-300 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-600 group-hover:text-black transition-colors">
