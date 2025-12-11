@@ -1,6 +1,6 @@
 from django.db import models
 
-# --- MODELO CATEGORÍA (Lo mantenemos porque Product lo necesita) ---
+# --- MODELO CATEGORÍA ---
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name="Nombre")
     slug = models.SlugField(unique=True, blank=True, null=True)
@@ -11,36 +11,39 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-# --- MODELO PRODUCTO (CORREGIDO Y COMPLETO) ---
+# --- MODELO PRODUCTO (PROFESIONAL Y LIMPIO) ---
 class Product(models.Model):
-    # 1. CAMPOS BÁSICOS (Los que faltaban y daban error)
+    # 1. Etiquetas de Marketing (TEXTO PURO, SIN EMOJIS)
+    class Label(models.TextChoices):
+        NONE = 'NONE', 'Sin etiqueta'
+        BLACK_FRIDAY = 'BF', 'Black Friday'
+        OFFER = 'OF', 'Oferta'
+        LIQUIDATION = 'LQ', 'Liquidación'
+        NEW = 'NW', 'Nuevo'
+
+    # 2. Campos Básicos
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE, verbose_name="Categoría")
     name = models.CharField(max_length=255, verbose_name="Nombre del Producto")
     brand = models.CharField(max_length=255, blank=True, null=True, verbose_name="Marca")
     description = models.TextField(blank=True, null=True, verbose_name="Descripción")
     
-    # 2. PRECIOS E IMAGEN
+    # 3. Precios e Imagen
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio Actual")
     original_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Precio Original (Antes)")
     image = models.ImageField(upload_to='products/', blank=True, null=True, verbose_name="Imagen Principal")
     
-    # 3. ESTADO
-    is_active = models.BooleanField(default=True, verbose_name="¿Activo?")
-    is_black_friday = models.BooleanField(default=False, verbose_name="¿Es Black Friday? (Check simple)")
+    # 4. Estado y Marketing
+    is_active = models.BooleanField(default=True, verbose_name="¿Visible en Tienda?")
+    
+    # Campo Legacy (Mantenido para evitar errores, pero no se usa visualmente)
+    is_black_friday = models.BooleanField(default=False, verbose_name="¿Es Black Friday? (Check)")
 
-    # 4. NUEVO CAMPO: ETIQUETA ESPECIAL (La funcionalidad que pediste)
-    LABEL_CHOICES = (
-        ('BF', 'Black Friday (Etiqueta Negra)'),
-        ('OF', 'Oferta (Etiqueta Roja)'),
-        ('LQ', 'Liquidación (Etiqueta Naranja)'),
-        ('NW', 'Nuevo (Etiqueta Azul)'),
-        ('NONE', 'Sin Etiqueta'),
-    )
+    # Campo de Etiqueta Profesional
     label = models.CharField(
         max_length=4, 
-        choices=LABEL_CHOICES, 
-        default='NONE',
-        verbose_name="Etiqueta Visual"
+        choices=Label.choices, 
+        default=Label.NONE,
+        verbose_name="Etiqueta de Marketing"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -54,7 +57,7 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-# --- OTROS MODELOS (Si tenías ProductImage, déjalo aquí) ---
+# --- MODELO IMÁGENES EXTRA ---
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='products/gallery/')

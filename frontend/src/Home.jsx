@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import { API_URL, getImageUrl } from './config'; // <--- 1. IMPORTANTE: Usamos tu config para que funcione en Local y Nube
 
 function Home() {
   const [featuredProduct, setFeaturedProduct] = useState(null);
@@ -8,8 +9,9 @@ function Home() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    // 1. CARGAR PRODUCTOS
-    fetch('https://danstore-backend.onrender.com/api/products/')
+    // 2. USAMOS API_URL EN LUGAR DE LA URL FIJA
+    // Cargar Productos
+    fetch(`${API_URL}/api/products/`)
       .then(res => res.json())
       .then(data => {
         if (data.length > 0) {
@@ -19,18 +21,25 @@ function Home() {
       })
       .catch(err => console.error("Error productos:", err));
 
-    // 2. CARGAR CATEGORÍAS
-    fetch('https://danstore-backend.onrender.com/api/categories/')
+    // Cargar Categorías
+    fetch(`${API_URL}/api/categories/`)
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(err => console.error("Error categorías:", err));
   }, []);
 
-  const getImageUrl = (imagePath) => {
-    return imagePath.startsWith('http') 
-      ? imagePath 
-      : `https://danstore-backend.onrender.com${imagePath}`;
+  // 3. HELPER PARA COLORES DE ETIQUETAS (Estilo Apple limpio)
+  const getLabelStyle = (code) => {
+    switch(code) {
+        case 'BF': return 'bg-black text-white';        // Black Friday
+        case 'OF': return 'bg-[#e3002b] text-white';    // Oferta (Rojo)
+        case 'NW': return 'bg-[#0071e3] text-white';    // Nuevo (Azul)
+        case 'LIQ': return 'bg-orange-500 text-white';  // Liquidación
+        default: return 'hidden';
+    }
   };
+
+  // Nota: Ya no necesitamos la función getImageUrl aquí dentro porque la importamos de config.js
 
   return (
     <div className="font-sans bg-white">
@@ -39,16 +48,14 @@ function Home() {
 
       <div className="pt-16">
 
-        {/* --- BARRA APPLE (Categorías) --- */}
+        {/* --- BARRA DE CATEGORÍAS (INTACTA) --- */}
         <div className="bg-white border-b border-gray-200 w-full h-[48px] flex justify-center items-center sticky top-16 z-40 transition-all duration-300">
             <div className="max-w-5xl px-4 flex items-center justify-center gap-10 overflow-x-auto no-scrollbar">
                 
                 <Link to="/catalogo" className="hover:opacity-60 transition-opacity flex-shrink-0">
-                    {/* --- ESTE ES EL CÓDIGO NUEVO (ICONO GENERAL DE CATÁLOGO) --- */}
                     <svg className="w-4 h-4 fill-current text-[#1d1d1f]" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/>
                     </svg>
-                    {/* ----------------------------------------------------------- */}
                 </Link>
 
                 <div className="flex gap-8 items-center">
@@ -80,9 +87,16 @@ function Home() {
 
         {/* --- HERO SECTION (Producto Principal) --- */}
         {featuredProduct && (
-        <section className="bg-[#f5f5f7] pt-14 pb-16 text-center border-b border-gray-100">
-            <div className="max-w-6xl mx-auto px-4 flex flex-col items-center">
+        <section className="bg-[#f5f5f7] pt-14 pb-16 text-center border-b border-gray-100 relative overflow-hidden">
+            <div className="max-w-6xl mx-auto px-4 flex flex-col items-center relative z-10">
                
+               {/* 4. ETIQUETA EN EL HERO (Discreta, arriba del título) */}
+               {featuredProduct.label && featuredProduct.label !== 'NONE' && (
+                   <span className={`mb-4 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide ${getLabelStyle(featuredProduct.label)}`}>
+                       {featuredProduct.label_display || featuredProduct.label}
+                   </span>
+               )}
+
                <h1 className="text-5xl md:text-6xl font-semibold tracking-tight text-[#1d1d1f] mb-2">
                   {featuredProduct.name}
                </h1>
@@ -91,7 +105,7 @@ function Home() {
                   {featuredProduct.brand || 'Potencia y belleza.'}
                </p>
 
-               {/* BOTONES HERO (Azul Sólido + Azul Borde) */}
+               {/* BOTONES HERO */}
                <div className="flex items-center gap-4 mb-14">
                   <Link 
                       to={`/catalogo?category=${featuredProduct.category}`} 
@@ -118,26 +132,32 @@ function Home() {
         </section>
         )}
 
-        {/* --- GRID SECTION (Productos Secundarios - AHORA CON LOS MISMOS BOTONES) --- */}
+        {/* --- GRID SECTION (Productos Secundarios) --- */}
         {secondaryProducts.length > 0 && (
         <section className="bg-white p-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {secondaryProducts.map((prod, index) => {
-                   // Lógica para alternar colores (Negro / Gris Claro)
                    const isDark = index % 2 === 0; 
                    const bgColor = isDark ? 'bg-white p-3' : 'bg-[#fbfbfd]';
-                   const textColor = isDark ? 'text-[#1d1d1f]' : 'text-[#1d1d1f]';
+                   const textColor = 'text-[#1d1d1f]';
 
                    return (
                    <div key={prod.id} className={`${bgColor} ${textColor} relative h-[650px] flex flex-col items-center pt-14 text-center overflow-hidden group`}>
                       
+                      {/* 5. ETIQUETA EN EL GRID (Flotante) */}
+                      {prod.label && prod.label !== 'NONE' && (
+                          <div className="absolute top-6 left-6 z-20">
+                              <span className={`text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase ${getLabelStyle(prod.label)}`}>
+                                  {prod.label_display || prod.label}
+                              </span>
+                          </div>
+                      )}
+
                       <div className="relative z-10 px-4 flex flex-col items-center w-full">
                           <h2 className="text-4xl md:text-5xl font-semibold mb-3 tracking-tight">{prod.brand}</h2>
                           <p className="text-xl font-normal mb-8">{prod.name}</p>
                           
-                          {/* BOTONES GRID (Idénticos al Hero) */}
                           <div className="flex gap-4 justify-center">
-                              {/* 1. MÁS INFORMACIÓN */}
                               <Link 
                                 to={`/catalogo?category=${prod.category}`} 
                                 className="bg-[#0071e3] text-white px-5 py-2 rounded-full font-normal text-[15px] hover:bg-[#0077ED] transition-colors min-w-[140px]"
@@ -145,7 +165,6 @@ function Home() {
                                 Más información
                               </Link>
 
-                              {/* 2. COMPRAR */}
                               <Link 
                                 to={`/product/${prod.id}`} 
                                 className="text-[#0071e3] bg-transparent border border-[#0071e3] px-5 py-2 rounded-full font-normal text-[15px] hover:bg-[#0071e3] hover:text-white transition-colors min-w-[100px]"
@@ -156,9 +175,9 @@ function Home() {
                       </div>
 
                       <img 
-                         src={getImageUrl(prod.image)}
-                         alt={prod.name}
-                         className="absolute bottom-0 w-full max-w-[480px] object-contain transition-transform duration-700 ease-out group-hover:scale-105"
+                          src={getImageUrl(prod.image)}
+                          alt={prod.name}
+                          className="absolute bottom-0 w-full max-w-[480px] object-contain transition-transform duration-700 ease-out group-hover:scale-105"
                       />
                    </div>
                    )

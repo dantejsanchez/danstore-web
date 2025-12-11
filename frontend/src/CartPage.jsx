@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from './context/CartContext';
 import Navbar from './components/Navbar';
 import { Link } from 'react-router-dom';
+import { API_URL, getImageUrl } from './config'; // <--- CONEXIÓN INTELIGENTE (No borrar)
 
 function CartPage() {
   const { cart, removeFromCart, updateQuantity, addToCart, total } = useCart();
@@ -22,16 +23,17 @@ function CartPage() {
     reference: '' 
   });
 
-  const FREE_SHIPPING_THRESHOLD = 24;
+  const FREE_SHIPPING_THRESHOLD = 20;
 
   // =====================================================================
   // 🎨 GUÍA DE COLORES
-  // El color principal ahora es: #0071e3 (Azul Tech/Apple)
-  // Busca los comentarios "<--- CAMBIA EL COLOR AQUÍ" para editar.
+  // Color Principal: #0071e3
+  // Busca los comentarios "<--- CAMBIA EL COLOR AQUÍ"
   // =====================================================================
 
   useEffect(() => {
-    fetch('https://danstore-backend.onrender.com/api/products/')
+    // Usamos API_URL para que funcione en tu PC y en Render
+    fetch(`${API_URL}/api/products/`)
       .then(res => res.json())
       .then(data => {
         setSuggestedProducts(data.slice(0, 3));
@@ -63,7 +65,7 @@ function CartPage() {
     };
 
     try {
-      const response = await fetch('https://danstore-backend.onrender.com/api/create_preference/', {
+      const response = await fetch(`${API_URL}/api/create_preference/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
@@ -83,14 +85,13 @@ function CartPage() {
     }
   };
 
-  const getImageUrl = (path) => (!path ? 'https://via.placeholder.com/150' : path.startsWith('http') ? path : `https://danstore-backend.onrender.com${path}`);
   const formatCurrency = (val) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(val);
   
   const missingForFreeShipping = FREE_SHIPPING_THRESHOLD - total;
   const shippingProgress = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
-  // CLASES DE COLOR (Para los círculos de pasos 1, 2, 3)
-  // 👇 CAMBIA EL COLOR DE LOS PASOS ACTIVOS AQUÍ (#0071e3)
+  // CLASES DE COLOR PARA LOS CÍRCULOS DE PASOS
+  // 👇 CAMBIA EL COLOR AQUÍ (#0071e3)
   const activeColorClass = "bg-[#0071e3] border-[#0071e3] text-white"; 
   const inactiveColorClass = "bg-white border-gray-300 text-gray-400";
 

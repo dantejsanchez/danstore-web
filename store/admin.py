@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import Product, Category, ProductImage # <-- 1. IMPORTAR ProductImage
+from .models import Category, Product, ProductImage
 
-# 1. Crear el Inline: Permite adjuntar múltiples imágenes directamente en el formulario de Producto
+# 1. Configuración de Imágenes Extra (Inline)
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
-    extra = 1 # Muestra 1 campo de subida extra por defecto
+    extra = 1
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -13,10 +13,33 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    # 2. Conectar el formulario de Producto con el Inline de imágenes
-    inlines = [ProductImageInline] 
+    # --- LISTADO PRINCIPAL (CORREGIDO) ---
+    # REGLA DE ORO: Todo lo que esté en 'list_editable' DEBE estar en 'list_display'
+    list_display = ('name', 'price', 'original_price', 'category', 'label', 'is_active')
+    
+    # Edición rápida sin entrar al producto
+    list_editable = ('price', 'label', 'is_active')
+    
+    # Filtros laterales
+    list_filter = ('category', 'label', 'is_active', 'brand')
+    
+    # Barra de búsqueda
+    search_fields = ('name', 'brand')
+    
+    # Imágenes extra dentro del producto
+    inlines = [ProductImageInline]
 
-    # Mantener tus configuraciones existentes
-    list_display = ('name', 'price', 'category', 'is_active')
-    list_editable = ('price', 'is_active')
-    list_filter = ('category',)
+    # --- ORGANIZACIÓN DEL FORMULARIO (Fieldsets) ---
+    fieldsets = (
+        ('Información Principal', {
+            'fields': ('name', 'category', 'brand', 'description', 'image')
+        }),
+        ('Precios', {
+            'fields': ('price', 'original_price'),
+            'description': 'Si pones un precio original mayor al actual, se calculará el descuento.'
+        }),
+        ('Marketing y Visibilidad', {
+            'fields': ('label', 'is_active', 'is_black_friday'), 
+            'classes': ('collapse',), 
+        }),
+    )

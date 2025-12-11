@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import { useCart } from './context/CartContext';
+import { API_URL, getImageUrl } from './config'; // <--- 1. IMPORTACIÓN NECESARIA
 
 const availableSizes = ['S', 'M', 'L', 'XL']; 
 const ratioOptions = [
@@ -35,27 +36,28 @@ function ProductDetail() {
 
   // --- EFECTOS ---
 
-  // 1. (RECUPERADO) Scroll al inicio cuando cambia el ID
+  // 1. Scroll al inicio
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [id]);
 
-  // 2. Carga de Producto Principal
+  // 2. Carga de Producto Principal (CONECTADO A TU PC O NUBE)
   useEffect(() => {
-    fetch(`https://danstore-backend.onrender.com/api/products/${id}/`)
+    fetch(`${API_URL}/api/products/${id}/`) // <--- Usamos API_URL
       .then(res => res.json())
       .then(data => {
         setProduct(data);
         if (data.image) {
-            setMainImageUrl(`https://danstore-backend.onrender.com${data.image}`);
+            // Usamos getImageUrl para que funcione en local
+            setMainImageUrl(getImageUrl(data.image));
         }
       });
   }, [id]);
 
-  // 3. Carga de Recomendaciones
+  // 3. Carga de Recomendaciones (CONECTADO)
   useEffect(() => {
     if (product && product.id) {
-        fetch(`https://danstore-backend.onrender.com/api/recommendations/${product.id}/`)
+        fetch(`${API_URL}/api/recommendations/${product.id}/`) // <--- Usamos API_URL
             .then(res => res.json())
             .then(data => {
                 setRecommendations(Array.isArray(data) ? data : []); 
@@ -64,6 +66,16 @@ function ProductDetail() {
     }
   }, [product]);
 
+  // --- HELPER PARA ETIQUETAS ---
+  const getLabelStyle = (code) => {
+    switch(code) {
+        case 'BF': return 'bg-black text-white';
+        case 'OF': return 'bg-red-600 text-white';
+        case 'NW': return 'bg-blue-600 text-white';
+        case 'LIQ': return 'bg-orange-500 text-white';
+        default: return 'hidden';
+    }
+  };
 
   if (!product) return <div className="text-center pt-40">Cargando producto...</div>
 
@@ -87,7 +99,6 @@ function ProductDetail() {
 
   const galleryImages = product.images ? product.images.filter(img => !img.is_variant_swatch) : [];
   const colorSwatches = product.images ? product.images.filter(img => img.is_variant_swatch) : [];
-
 
   // --- ZOOM ---
   const handleMouseMove = (e) => {
@@ -117,7 +128,6 @@ function ProductDetail() {
     cursor: zoomEnabled ? 'crosshair' : 'default',
   };
 
-
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -141,11 +151,11 @@ function ProductDetail() {
                     {[product.image, ...galleryImages.map(img => img.image)].map((imgUrl, index) => (
                          <div 
                             key={index}
-                            onClick={() => setMainImageUrl(`https://danstore-backend.onrender.com${imgUrl}`)}
+                            onClick={() => setMainImageUrl(getImageUrl(imgUrl))} // <--- URL CORREGIDA
                             className={`w-20 h-20 border cursor-pointer overflow-hidden rounded-md flex items-center justify-center transition-colors ${mainImageUrl.includes(imgUrl) ? 'border-2 border-black' : 'border-gray-200 hover:border-gray-400'}`}
                         >
                             <img 
-                                src={`https://danstore-backend.onrender.com${imgUrl}`} 
+                                src={getImageUrl(imgUrl)} // <--- URL CORREGIDA
                                 alt={`Thumbnail ${index}`} 
                                 className="w-full h-full object-cover"
                             />
@@ -180,6 +190,14 @@ function ProductDetail() {
 
             {/* --- INFO Y OPCIONES --- */}
             <div className="pl-4">
+                
+                {/* 4. ETIQUETA DINÁMICA (AQUÍ LA AGREGAMOS) */}
+                {product.label && product.label !== 'NONE' && (
+                    <span className={`inline-block mb-2 text-[10px] font-bold px-2 py-1 rounded uppercase ${getLabelStyle(product.label)}`}>
+                        {product.label_display || product.label}
+                    </span>
+                )}
+
                 <h1 className="text-3xl font-bold text-gray-900 mb-1">{product.name}</h1>
                 <p className="text-base text-gray-600 mb-6">{product.brand || "DOO AUSTRALIA"}</p>
                 
@@ -204,12 +222,12 @@ function ProductDetail() {
                             <div 
                                 key={img.image}
                                 onClick={() => {
-                                    setMainImageUrl(`https://danstore-backend.onrender.com${img.image}`);
+                                    setMainImageUrl(getImageUrl(img.image)); // <--- URL CORREGIDA
                                     setSelectedColor('Variante'); 
                                 }}
                                 className={`w-12 h-12 border cursor-pointer overflow-hidden rounded-md transition-colors p-0.5 ${mainImageUrl.includes(img.image) ? 'border-2 border-black' : 'border-gray-300 hover:border-gray-400'}`}
                             >
-                                <img src={`https://danstore-backend.onrender.com${img.image}`} alt="Swatch" className="w-full h-full object-cover rounded-sm"/>
+                                <img src={getImageUrl(img.image)} alt="Swatch" className="w-full h-full object-cover rounded-sm"/>
                             </div>
                         )) : (
                             <span className="w-12 h-12 border border-gray-400 bg-yellow-100 rounded-md cursor-pointer flex items-center justify-center text-xs" onClick={() => setSelectedColor('Amarillo')}>A/M</span>
@@ -263,7 +281,7 @@ function ProductDetail() {
 
         <hr className="my-12"/>
 
-        {/* Recomendaciones (CON DESCUENTO) */}
+        {/* Recomendaciones */}
         {recommendations.length > 0 && (
             <div className="mt-12">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Productos Relacionados (Completa el Outfit)</h2>
@@ -271,15 +289,15 @@ function ProductDetail() {
                     {recommendations.map((rec) => (
                         <Link to={`/product/${rec.id}`} key={rec.id} className="group bg-white rounded-lg p-3 shadow-md border border-gray-100 relative cursor-pointer block hover:shadow-lg transition-shadow">
                             
-                            {/* Sticker de Oferta */}
-                            {rec.original_price && (
-                                <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded z-10">
-                                    OFERTA
+                            {/* 5. ETIQUETA DINÁMICA EN RECOMENDACIONES (Si existe etiqueta) */}
+                            {rec.label && rec.label !== 'NONE' && (
+                                <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-1 rounded z-10 uppercase ${getLabelStyle(rec.label)}`}>
+                                    {rec.label_display || rec.label}
                                 </span>
                             )}
 
                             <div className="aspect-square bg-gray-100 mb-3 overflow-hidden rounded-md">
-                                <img src={`https://danstore-backend.onrender.com${rec.image}`} alt={rec.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                <img src={getImageUrl(rec.image)} alt={rec.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                             </div>
                             <p className="text-xs text-gray-500 uppercase font-bold">{rec.brand}</p>
                             <p className="text-sm font-medium text-gray-800 h-8 overflow-hidden">{rec.name}</p>
