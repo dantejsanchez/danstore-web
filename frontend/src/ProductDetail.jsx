@@ -33,6 +33,8 @@ function ProductDetail() {
   const { addToCart } = useCart();
   const [zoomEnabled, setZoomEnabled] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  // Usamos una referencia de estado para asegurar que el elemento existe antes de medirlo
   const [imageContainerRef, setImageContainerRef] = useState(null);
 
   // --- EFECTOS ---
@@ -59,7 +61,7 @@ function ProductDetail() {
     }
   }, [product]);
 
-  // --- ESTILOS VISUALES (COHERENTES CON TU CATÁLOGO) ---
+  // --- ESTILOS VISUALES ---
   const BLUE_COLOR = "bg-[#0071e3]";
   const TEXT_BLUE = "text-[#0071e3]";
   const BORDER_FOCUS = "ring-2 ring-[#0071e3] ring-offset-1";
@@ -97,13 +99,23 @@ function ProductDetail() {
   const galleryImages = product.images ? product.images.filter(img => !img.is_variant_swatch) : [];
   const colorSwatches = product.images ? product.images.filter(img => img.is_variant_swatch) : [];
 
-  // --- ZOOM ---
+  // =====================================================================
+  // 🔧 CORRECCIÓN TÉCNICA DEL ZOOM (CLAMPING)
+  // =====================================================================
   const handleMouseMove = (e) => {
     if (!imageContainerRef) return;
-    const target = e.currentTarget.firstChild; 
-    const { left, top, width, height } = target.getBoundingClientRect();
-    const x = (e.clientX - left) / width;
-    const y = (e.clientY - top) / height;
+    
+    const { left, top, width, height } = imageContainerRef.getBoundingClientRect();
+    
+    // Calculamos posición relativa
+    let x = (e.clientX - left) / width;
+    let y = (e.clientY - top) / height;
+
+    // 🛡️ REGLA DE ORO: CLAMP (Forzar valores entre 0 y 1)
+    // Esto evita que la imagen "salga volando" si el mouse se sale un píxel del borde
+    x = Math.max(0, Math.min(1, x));
+    y = Math.max(0, Math.min(1, y));
+
     setMousePosition({ x, y });
   };
 
@@ -112,9 +124,9 @@ function ProductDetail() {
 
   const zoomImageStyle = {
     backgroundImage: `url(${mainImageUrl})`,
-    backgroundSize: zoomEnabled ? '200%' : 'cover', 
+    backgroundSize: zoomEnabled ? '200%' : 'cover', // 200% es un zoom estándar bueno
     backgroundPosition: zoomEnabled ? `${mousePosition.x * 100}% ${mousePosition.y * 100}%` : 'center center',
-    transition: 'background-position 0.05s ease-out',
+    transition: 'background-position 0.08s ease-out', // Un poco más suave para que no vibre
   };
 
   return (
@@ -123,14 +135,29 @@ function ProductDetail() {
 
       <div className="pt-28 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         
-        {/* Breadcrumb (Estilo Coherente con Catálogo) */}
-        <div className="text-xs text-gray-500 mb-8 flex gap-2 items-center">
-            <Link to="/" className={`hover:${TEXT_BLUE} transition-colors`}>Home</Link> 
+        {/* =========================================================
+            BREADCRUMBS ESTILO PROFESIONAL (CAMBIO SOLICITADO) 
+           ========================================================= */}
+        <div className="flex items-center text-xs text-gray-500 mb-8 gap-2">
+            <Link to="/" className={`flex items-center gap-1 hover:${TEXT_BLUE} transition-colors`}>
+                {/* Icono Home */}
+                <svg className="w-3.5 h-3.5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                Home
+            </Link>
+            
+            {/* Separador */}
             <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
-            <Link to="/catalogo" className={`hover:${TEXT_BLUE} transition-colors`}>Catálogo</Link> 
+            
+            {/* Catálogo en Negrita */}
+            <Link to="/catalogo" className="font-bold text-black hover:opacity-70 transition-opacity">Catálogo</Link>
+            
+            {/* Separador */}
             <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
-            <span className="font-bold text-black">{product.name}</span>
+            
+            {/* Nombre del Producto en Azul */}
+            <span className={`${TEXT_BLUE} font-medium`}>{product.name}</span>
         </div>
+        {/* ========================================================= */}
 
         <div className="grid grid-cols-1 lg:grid-cols-[450px_minmax(400px,_1fr)] xl:grid-cols-[550px_minmax(400px,_1fr)] gap-12 items-start">
             
@@ -151,16 +178,10 @@ function ProductDetail() {
                     ))}
                 </div>
 
-                {/* IMAGEN PRINCIPAL (Contenedor Padre Fijo pero invisible) */}
+                {/* IMAGEN PRINCIPAL */}
                 <div 
-                    // Se eliminó el borde y fondo de aquí. Ahora es solo un contenedor espacial.
-                    // Agregué 'p-2' para dar espacio a la sombra del hijo.
                     className="flex-1 relative h-[550px] w-full flex items-center justify-center p-2"
                 >
-                    {/* CONTENEDOR DINÁMICO (Este es el que lleva el marco y la sombra)
-                        - Se mueve la etiqueta aquí dentro para que acompañe al marco.
-                        - Se agregan 'border', 'border-gray-200' y 'shadow-xl' para que se note bien.
-                    */}
                     <div 
                         ref={setImageContainerRef}
                         className={`relative w-full ${selectedRatio} max-h-full transition-all duration-500 ease-in-out rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white cursor-crosshair group`}
@@ -168,7 +189,7 @@ function ProductDetail() {
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >
-                        {/* Etiqueta (Móvida aquí dentro) */}
+                        {/* Etiqueta dentro del marco */}
                         {product.label && product.label !== 'NONE' && (
                             <span className={`absolute top-4 left-4 z-30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm ${getLabelStyle(product.label)}`}>
                                 {product.label_display || product.label}
@@ -176,8 +197,10 @@ function ProductDetail() {
                         )}
 
                          {zoomEnabled ? (
-                            <div style={zoomImageStyle} className="absolute inset-0 w-full h-full bg-no-repeat" />
+                            // Zoom Activo
+                            <div style={zoomImageStyle} className="absolute inset-0 w-full h-full bg-no-repeat bg-white" />
                         ) : (
+                            // Imagen Normal
                             <img 
                                 src={mainImageUrl} 
                                 className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${focusPosition}`} 
