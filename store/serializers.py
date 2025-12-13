@@ -61,6 +61,9 @@ class ProductSerializer(serializers.ModelSerializer):
     # Campo mágico 2: Galería de imágenes extra
     images = ProductImageSerializer(many=True, read_only=True)
 
+    # 🔴 CORRECCIÓN: Forzamos la obtención de la URL de la imagen
+    image = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Product
         # Lista explícita y profesional de campos
@@ -79,6 +82,16 @@ class ProductSerializer(serializers.ModelSerializer):
             'label_display',   # El texto: 'Black Friday', 'Oferta'
             'images'           # Array de imágenes extra
         ]
+
+    def get_image(self, obj):
+        """
+        Este método se asegura de que siempre se use la propiedad .url del
+        almacenamiento de archivos (Cloudinary en producción).
+        """
+        if obj.image and hasattr(obj.image, 'url'):
+            return obj.image.url
+        return None
+
 
 # ==========================================
 # 3. SERIALIZADOR DE LOGIN JWT
