@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
 # Si existe la variable RENDER en el sistema, DEBUG será False. Si no, True.
-DEBUG = not os.environ.get('RENDER', False)
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
