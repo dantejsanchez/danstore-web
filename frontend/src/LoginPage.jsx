@@ -31,9 +31,32 @@ function LoginPage() {
     }
   };
 
-  // Colores de marca
-  const BRAND_BLUE = "text-[#0071e3]";
-  const BG_BLUE_HOVER = "hover:bg-[#0077ED]";
+  // =========================================================================
+  // 🎨 ZONA DE PERSONALIZACIÓN DE COLORES
+  // =========================================================================
+  
+  // 1. Color principal del texto de enlaces y detalles
+  // Cambia "text-[#0071e3]" por "text-gray-800" (Gris oscuro) o "text-black"
+  const BRAND_COLOR_TEXT = "text-[#0071e3]"; 
+
+  // 2. Color de fondo del BOTÓN principal
+  // Cambia "bg-[#0071e3]" por "bg-[#1d1d1f]" (Plomo oscuro estilo Apple) o "bg-black"
+  const BTN_BG_COLOR = "bg-[#0071e3]";
+
+  // 3. Color del BOTÓN al pasar el mouse (Hover)
+  // Cambia "hover:bg-[#0077ED]" por "hover:bg-gray-800" o "hover:bg-gray-900"
+  const BTN_HOVER_COLOR = "hover:bg-[#0077ED]";
+
+  // 4. Color del borde/anillo cuando haces clic en un INPUT
+  // Cambia "focus:border-[#0071e3]" por "focus:border-gray-400"
+  // Cambia "focus:ring-blue-500/10" por "focus:ring-gray-200/50"
+  const INPUT_FOCUS_STYLE = "focus:border-[#0071e3] focus:ring-blue-500/10"; 
+
+  // 5. Degradado de la línea decorativa superior
+  // Cambia "from-blue-400 to-[#0071e3]" por "from-gray-300 to-gray-500"
+  const TOP_BAR_GRADIENT = "from-blue-400 to-[#0071e3]";
+
+  // =========================================================================
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] font-sans text-[#1d1d1f]">
@@ -44,8 +67,8 @@ function LoginPage() {
         {/* TARJETA DE LOGIN */}
         <div className="bg-white p-10 rounded-3xl shadow-xl shadow-gray-200/50 max-w-[420px] w-full border border-gray-100 relative overflow-hidden">
             
-            {/* Decoración sutil superior */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-[#0071e3]"></div>
+            {/* Decoración sutil superior (Usa la variable TOP_BAR_GRADIENT) */}
+            <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${TOP_BAR_GRADIENT}`}></div>
 
             <div className="text-center mb-10">
                 <h2 className="text-3xl font-bold tracking-tight mb-2">Bienvenido</h2>
@@ -69,7 +92,8 @@ function LoginPage() {
                         <input 
                             type="email" 
                             required
-                            className="w-full pl-4 pr-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-[#0071e3] focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200"
+                            // Aquí se aplica el estilo de foco personalizado (INPUT_FOCUS_STYLE)
+                            className={`w-full pl-4 pr-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-4 outline-none transition-all duration-200 ${INPUT_FOCUS_STYLE}`}
                             placeholder="nombre@ejemplo.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -81,13 +105,15 @@ function LoginPage() {
                 <div className="space-y-1.5">
                     <div className="flex justify-between items-center ml-1">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Contraseña</label>
-                        <a href="#" className="text-xs text-[#0071e3] hover:underline font-medium">¿Olvidaste tu clave?</a>
+                        {/* Aquí se aplica el color de texto de marca (BRAND_COLOR_TEXT) */}
+                        <a href="#" className={`text-xs ${BRAND_COLOR_TEXT} hover:underline font-medium`}>¿Olvidaste tu clave?</a>
                     </div>
                     <div className="relative">
                         <input 
                             type="password" 
                             required
-                            className="w-full pl-4 pr-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-[#0071e3] focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200"
+                            // Aquí se aplica el estilo de foco personalizado (INPUT_FOCUS_STYLE)
+                            className={`w-full pl-4 pr-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-4 outline-none transition-all duration-200 ${INPUT_FOCUS_STYLE}`}
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -99,8 +125,9 @@ function LoginPage() {
                 <button 
                     type="submit" 
                     disabled={isLoading}
-                    className={`w-full bg-[#0071e3] text-white py-4 rounded-full font-bold text-lg shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2
-                        ${isLoading ? 'opacity-80 cursor-not-allowed' : BG_BLUE_HOVER}
+                    // Aquí se aplican los colores de fondo y hover (BTN_BG_COLOR, BTN_HOVER_COLOR)
+                    className={`w-full text-white py-4 rounded-full font-bold text-lg shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2
+                        ${isLoading ? 'opacity-80 cursor-not-allowed bg-gray-400' : `${BTN_BG_COLOR} ${BTN_HOVER_COLOR}`}
                     `}
                 >
                     {isLoading ? (
@@ -116,7 +143,8 @@ function LoginPage() {
 
             <div className="mt-8 pt-6 border-t border-gray-100 text-center">
                 <p className="text-sm text-gray-500">
-                    ¿Aún no tienes cuenta? <Link to="/register" className={`font-bold ${BRAND_BLUE} hover:underline`}>Regístrate gratis</Link>
+                    {/* Aquí se aplica el color de texto de marca (BRAND_COLOR_TEXT) */}
+                    ¿Aún no tienes cuenta? <Link to="/register" className={`font-bold ${BRAND_COLOR_TEXT} hover:underline`}>Regístrate gratis</Link>
                 </p>
             </div>
         </div>

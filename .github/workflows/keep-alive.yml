@@ -1,0 +1,16 @@
+name: Despertador Backend
+
+on:
+  schedule:
+    # Se ejecuta cada 14 minutos
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Te permite ejecutarlo manualmente si quieres probar
+
+jobs:
+  ping_site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Despertar Backend Render
+        run: |
+          curl -I https://danstore-backend.onrender.com/
+          echo "¡Ping enviado correctamente al backend!"
