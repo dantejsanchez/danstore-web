@@ -17,8 +17,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Lee la clave secreta de la nube, o usa la local por defecto
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# Si estamos en RENDER, Debug será False (Seguro). En tu PC será True.
-DEBUG = True
+# Si existe la variable RENDER en el sistema, DEBUG será False. Si no, True.
+DEBUG = not os.environ.get('RENDER', False)
 
 ALLOWED_HOSTS = ['*']
 
@@ -116,15 +116,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Lógica corregida: Definimos el almacenamiento SIEMPRE
+# Habilitar WhiteNoise para que sirva los archivos en producción
 if not DEBUG:
-    # Producción (Render): Usamos WhiteNoise con compresión
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-else:
-    # Desarrollo (DEBUG=True): Usamos el estándar de Django
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+    # Usamos esta versión que es más estable y no rompe si falta un archivo pequeño
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 
 # ==========================================

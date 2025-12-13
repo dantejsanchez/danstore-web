@@ -4,5 +4,8 @@ set -o errexit
 
 pip install -r requirements.txt
 
-python manage.py collectstatic --no-input
+# ESTA ES LA LÍNEA MÁGICA:
+# Crea la carpeta staticfiles y mete ahí todo el CSS/JS para que WhiteNoise lo encuentre
+python manage.py collectstatic --noinput
+
 python manage.py migrate
