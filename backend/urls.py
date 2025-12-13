@@ -14,12 +14,14 @@ urlpatterns = [
     path('api/categories/', views.get_categories, name='get_categories'),
     path('api/brands/', views.get_unique_brands, name='get_unique_brands'),
     path('api/recommendations/<int:pk>/', views.get_related_products, name='get_related_products'),
-    
-    # 🔴 ESTA ES LA CORRECCIÓN: Apuntamos a create_preference
     path('api/create_preference/', views.create_preference, name='create_preference'),
 
     # API AUTH
     path('api/login/', views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/register/', views.register_user, name='register'),
+]
 
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Configuración para Archivos Estáticos y Media
+# Esto asegura que funcionen tanto en DEV como en PROD si algo falla
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
