@@ -182,3 +182,30 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# --- DIAGNOSTIC LOGGING ---
+# The following lines will print diagnostic information to your Render logs
+# during application startup. This will help debug the configuration.
+print("\n" + "="*50)
+print("DIAGNOSTIC INFO - START")
+print("="*50)
+print(f"[SETTINGS] DEBUG = {DEBUG}")
+print(f"[STORAGE] DEFAULT_FILE_STORAGE = {DEFAULT_FILE_STORAGE}")
+print(f"[STORAGE] STATICFILES_STORAGE = {STATICFILES_STORAGE}")
+print(f"[PATHS] STATIC_ROOT = {STATIC_ROOT}")
+print(f"[PATHS] MEDIA_ROOT = {MEDIA_ROOT}")
+
+# Check Cloudinary settings as seen by Django
+try:
+    cloud_name = CLOUDINARY_STORAGE.get('CLOUD_NAME', 'NOT FOUND')
+    api_key_found = 'YES' if CLOUDINARY_STORAGE.get('API_KEY') else 'NO'
+    api_secret_found = 'YES' if CLOUDINARY_STORAGE.get('API_SECRET') else 'NO'
+    print(f"[CLOUDINARY] CLOUD_NAME = {cloud_name}")
+    print(f"[CLOUDINARY] API_KEY Found? = {api_key_found}")
+    print(f"[CLOUDINARY] API_SECRET Found? = {api_secret_found}")
+except NameError:
+    print("[CLOUDINARY] 'CLOUDINARY_STORAGE' dictionary not found.")
+
+print("="*50)
+print("DIAGNOSTIC INFO - END")
+print("="*50 + "\n")
