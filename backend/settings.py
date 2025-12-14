@@ -17,8 +17,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Lee la clave secreta de la nube, o usa la local por defecto
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# Si 'RENDER' está en las variables de entorno, estamos en producción.
-DEBUG = 'RENDER' not in os.environ
+# Si estamos en RENDER, Debug será False (Seguro). En tu PC será True.
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -141,21 +141,11 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Configuración OBLIGATORIA de Cloudinary (Sin if ni else)
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# Configuración estricta: Falla si las variables de entorno no están.
-CLOUDINARY_STORAGE = {}
-if not DEBUG:
-    try:
-        CLOUDINARY_STORAGE['CLOUD_NAME'] = os.environ['CLOUDINARY_CLOUD_NAME']
-        CLOUDINARY_STORAGE['API_KEY'] = os.environ['CLOUDINARY_API_KEY']
-        CLOUDINARY_STORAGE['API_SECRET'] = os.environ['CLOUDINARY_API_SECRET']
-    except KeyError as e:
-        raise KeyError(f"Variable de entorno para Cloudinary no encontrada: {e}. La aplicación no puede iniciar.") from e
-else:
-    # Para desarrollo local, es opcional y no detiene la app.
-    CLOUDINARY_STORAGE['CLOUD_NAME'] = os.environ.get('CLOUDINARY_CLOUD_NAME')
-    CLOUDINARY_STORAGE['API_KEY'] = os.environ.get('CLOUDINARY_API_KEY')
-    CLOUDINARY_STORAGE['API_SECRET'] = os.environ.get('CLOUDINARY_API_SECRET')
-
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
 
 # Estas rutas siguen siendo necesarias para que Django sepa manejarlo
 MEDIA_URL = '/media/'
@@ -182,30 +172,3 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
-# --- DIAGNOSTIC LOGGING ---
-# The following lines will print diagnostic information to your Render logs
-# during application startup. This will help debug the configuration.
-print("\n" + "="*50)
-print("DIAGNOSTIC INFO - START")
-print("="*50)
-print(f"[SETTINGS] DEBUG = {DEBUG}")
-print(f"[STORAGE] DEFAULT_FILE_STORAGE = {DEFAULT_FILE_STORAGE}")
-print(f"[STORAGE] STATICFILES_STORAGE = {STATICFILES_STORAGE}")
-print(f"[PATHS] STATIC_ROOT = {STATIC_ROOT}")
-print(f"[PATHS] MEDIA_ROOT = {MEDIA_ROOT}")
-
-# Check Cloudinary settings as seen by Django
-try:
-    cloud_name = CLOUDINARY_STORAGE.get('CLOUD_NAME', 'NOT FOUND')
-    api_key_found = 'YES' if CLOUDINARY_STORAGE.get('API_KEY') else 'NO'
-    api_secret_found = 'YES' if CLOUDINARY_STORAGE.get('API_SECRET') else 'NO'
-    print(f"[CLOUDINARY] CLOUD_NAME = {cloud_name}")
-    print(f"[CLOUDINARY] API_KEY Found? = {api_key_found}")
-    print(f"[CLOUDINARY] API_SECRET Found? = {api_secret_found}")
-except NameError:
-    print("[CLOUDINARY] 'CLOUDINARY_STORAGE' dictionary not found.")
-
-print("="*50)
-print("DIAGNOSTIC INFO - END")
-print("="*50 + "\n")
