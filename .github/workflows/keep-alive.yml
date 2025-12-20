@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: Despertar Backend Render
         run: |
-          curl -I --max-time 10 https://danstore-backend.onrender.com/
+          curl -I https://danstore-backend.onrender.com/
           echo "¡Ping enviado correctamente al backend!"
