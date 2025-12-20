@@ -11,42 +11,46 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ==========================================
-# 1. CONFIGURACIÓN DE SEGURIDAD
+# 1. CONFIGURACIÓN DE SEGURIDAD (PRODUCCIÓN)
 # ==========================================
 
-# Clave de emergencia
-SECRET_KEY = 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu'
+# Lee la clave secreta de la nube, o usa la local por defecto
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# DEBUG en True para ver errores si algo falla
+# Si estamos en RENDER, Debug será False (Seguro). En tu PC será True.
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
 
 # ==========================================
-# 2. APLICACIONES
+# 2. APLICACIONES Y MIDDLEWARE
 # ==========================================
 
 INSTALLED_APPS = [
-    'cloudinary_storage',
-    'cloudinary',
+    'cloudinary_storage',       # <--- OBLIGATORIO: Agrega esto
+    'cloudinary',               # <--- OBLIGATORIO: Agrega esto
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Apps de Terceros
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    
+    # Mis Apps
     'store',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # Siempre el primero
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Vital para imágenes en Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -76,14 +80,15 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # ==========================================
-# 3. BASE DE DATOS
+# 3. BASE DE DATOS (HÍBRIDA)
 # ==========================================
 
+# En tu PC usa SQLite. En Render usa PostgreSQL automáticamente.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
+    )
 }
 
 
@@ -105,39 +110,50 @@ USE_TZ = True
 
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS
+# 5. ARCHIVOS ESTÁTICOS (CORREGIDO)
 # ==========================================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Lógica corregida: Definimos el almacenamiento SIEMPRE
+if not DEBUG:
+    # Producción (Render): Usamos WhiteNoise con compresión
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    # Desarrollo (DEBUG=True): Usamos el estándar de Django
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ==========================================
-# 6. CORS
+# 6. CORS (CONEXIÓN CON REACT)
 # ==========================================
+
+# Permitir todo para evitar errores en el primer despliegue
 CORS_ALLOW_ALL_ORIGINS = True
 
 
 # ==========================================
-# 7. MULTIMEDIA (CLOUDARY) - CORREGIDO
+# 7. MULTIMEDIA (FOTOS)
 # ==========================================
-# Aquí puse tus claves DIRECTAMENTE para que no falle buscando el .env que no existe
+# Configuración OBLIGATORIA de Cloudinary (Sin if ni else)
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dk64vjoit',
-    'API_KEY': '694754861946913',
-    'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
+# Estas rutas siguen siendo necesarias para que Django sepa manejarlo
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # ==========================================
-# 8. REST FRAMEWORK
+# 8. REST FRAMEWORK & JWT
 # ==========================================
 
 REST_FRAMEWORK = {
