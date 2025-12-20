@@ -10,7 +10,7 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ==========================================
-# 1. CONFIGURACIÓN DE SEGURIDAD
+# 1. CONFIGURACIÓN DE SEGURIDAD (CORREGIDA)
 # ==========================================
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
@@ -20,16 +20,21 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# ✅ CAMBIO 1: Agregamos Oracle Y Localhost para que funcione en los dos lados
+# ✅ SOLUCIÓN AL ERROR CSRF 403
 CSRF_TRUSTED_ORIGINS = [
-    'http://129.151.109.180',      # Tu Servidor Oracle
-    'http://localhost:5173',       # Tu React Local
-    'http://127.0.0.1:8000',       # Tu Django Local
+    'http://129.151.109.180',      # Tu IP de Oracle
+    'https://129.151.109.180',     # Por si acaso
+    'http://localhost:5173',       # React Local
+    'http://127.0.0.1:8000',       # Django Local
 ]
 
-# ✅ CAMBIO 2: Cookies permitidas sin HTTPS (Vital para evitar el error 403 actual)
+# ✅ ESTA LÍNEA ES OBLIGATORIA PARA NGINX (Evita que Django rechace la petición)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# ✅ COOKIES PERMISIVAS (Necesario porque usas HTTP puerto 80, no HTTPS)
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
+
 
 # ==========================================
 # 2. APLICACIONES Y MIDDLEWARE
@@ -82,6 +87,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+
 # ==========================================
 # 3. BASE DE DATOS
 # ==========================================
@@ -92,6 +98,7 @@ DATABASES = {
         conn_max_age=600
     )
 }
+
 
 # ==========================================
 # 4. PASSWORD & IDIOMA
@@ -109,6 +116,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+
 # ==========================================
 # 5. ARCHIVOS ESTÁTICOS
 # ==========================================
@@ -123,11 +131,13 @@ else:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 # ==========================================
 # 6. CORS
 # ==========================================
 
 CORS_ALLOW_ALL_ORIGINS = True
+
 
 # ==========================================
 # 7. MULTIMEDIA (CLOUDINARY)
@@ -143,6 +153,7 @@ CLOUDINARY_STORAGE = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # ==========================================
 # 8. REST FRAMEWORK & JWT
