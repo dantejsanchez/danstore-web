@@ -20,7 +20,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba
 # Si estamos en RENDER, Debug será False (Seguro). En tu PC será True.
 DEBUG = True
 
-ALLOWED_HOSTS = ['129.151.109.180', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 # ==========================================
@@ -134,18 +134,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Permitir todo para evitar errores en el primer despliegue
 CORS_ALLOW_ALL_ORIGINS = True
 
+
 # ==========================================
 # 7. MULTIMEDIA (FOTOS)
 # ==========================================
+# Configuración OBLIGATORIA de Cloudinary (Sin if ni else)
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# CORRECCIÓN: Quitamos el "os.environ.get" y dejamos los textos directos entre comillas
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dk64vjoit',
-    'API_KEY': '694754861946913',
-    'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
+# Estas rutas siguen siendo necesarias para que Django sepa manejarlo
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
