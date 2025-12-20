@@ -9,48 +9,52 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # ==========================================
-# 1. CONFIGURACIÓN DE SEGURIDAD (PRODUCCIÓN)
+# 1. CONFIGURACIÓN DE SEGURIDAD
 # ==========================================
 
-# Lee la clave secreta de la nube, o usa la local por defecto
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# Si estamos en RENDER, Debug será False (Seguro). En tu PC será True.
+# Mantenlo en True mientras estamos probando
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# ✅ CAMBIO 1: Agregamos Oracle Y Localhost para que funcione en los dos lados
+CSRF_TRUSTED_ORIGINS = [
+    'http://129.151.109.180',      # Tu Servidor Oracle
+    'http://localhost:5173',       # Tu React Local
+    'http://127.0.0.1:8000',       # Tu Django Local
+]
+
+# ✅ CAMBIO 2: Cookies permitidas sin HTTPS (Vital para evitar el error 403 actual)
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
 
 # ==========================================
 # 2. APLICACIONES Y MIDDLEWARE
 # ==========================================
 
 INSTALLED_APPS = [
-    'cloudinary_storage',       # <--- OBLIGATORIO: Agrega esto
-    'cloudinary',               # <--- OBLIGATORIO: Agrega esto
+    'cloudinary_storage',
+    'cloudinary',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # Apps de Terceros
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    
-    # Mis Apps
     'store',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', # Siempre el primero
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Vital para imágenes en Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -78,19 +82,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
 # ==========================================
-# 3. BASE DE DATOS (HÍBRIDA)
+# 3. BASE DE DATOS
 # ==========================================
 
-# En tu PC usa SQLite. En Render usa PostgreSQL automáticamente.
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
         conn_max_age=600
     )
 }
-
 
 # ==========================================
 # 4. PASSWORD & IDIOMA
@@ -108,49 +109,40 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS (CORREGIDO)
+# 5. ARCHIVOS ESTÁTICOS
 # ==========================================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Lógica corregida: Definimos el almacenamiento SIEMPRE
 if not DEBUG:
-    # Producción (Render): Usamos WhiteNoise con compresión
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 else:
-    # Desarrollo (DEBUG=True): Usamos el estándar de Django
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 # ==========================================
-# 6. CORS (CONEXIÓN CON REACT)
+# 6. CORS
 # ==========================================
 
-# Permitir todo para evitar errores en el primer despliegue
 CORS_ALLOW_ALL_ORIGINS = True
 
+# ==========================================
+# 7. MULTIMEDIA (CLOUDINARY)
+# ==========================================
 
-# ==========================================
-# 7. MULTIMEDIA (FOTOS)
-# ==========================================
-# Configuración OBLIGATORIA de Cloudinary (Sin if ni else)
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': 'dk64vjoit',
+    'API_KEY': '694754861946913',
+    'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
 }
 
-# Estas rutas siguen siendo necesarias para que Django sepa manejarlo
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 
 # ==========================================
 # 8. REST FRAMEWORK & JWT
