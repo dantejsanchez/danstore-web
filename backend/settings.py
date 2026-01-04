@@ -18,7 +18,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba
 
 # IMPORTANTE: En producción (Oracle) esto debe ser False.
 # Si tienes un error 500 y no sabes qué es, cámbialo a True momentáneamente para ver el error.
-DEBUG = False
+DEBUG = True
 
 # Aquí permite tu IP de Oracle y localhost.
 # El '*' permite todo, úsalo solo si tienes problemas de conexión al inicio.
