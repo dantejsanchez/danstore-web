@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: Despertar Backend Render
         run: |
-          curl -I https://danstore-backend.onrender.com/
+          curl -I http://129.151.109.180:8000/
           echo "¡Ping enviado correctamente al backend!"
