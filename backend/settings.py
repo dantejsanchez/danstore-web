@@ -1,5 +1,5 @@
 """
-Django settings for backend project - VERSIÓN PRODUCCIÓN CLOUDINARY
+Django settings for backend project - VERSIÓN FINAL PRODUCCIÓN
 """
 import os
 from pathlib import Path
@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 1. CONFIGURACIÓN DE SEGURIDAD
 # ==========================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
-DEBUG = True # Cambiar a False cuando todo esté verificado
+DEBUG = True 
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
@@ -23,17 +23,17 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # ==========================================
-# 2. APLICACIONES Y MIDDLEWARE
+# 2. APLICACIONES (ORDEN CRÍTICO)
 # ==========================================
 INSTALLED_APPS = [
-    'cloudinary_storage', # Debe ir antes de staticfiles
+    'cloudinary_storage', # Primero para interceptar MEDIA
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary', # App de Cloudinary
+    'cloudinary',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -54,10 +54,30 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'backend.urls'
-WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ==========================================
-# 3. BASE DE DATOS
+# 3. TEMPLATES (CORREGIDO PARA EL ADMIN)
+# ==========================================
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'wsgi.application'
+
+# ==========================================
+# 4. BASE DE DATOS
 # ==========================================
 DATABASES = {
     'default': {
@@ -67,7 +87,7 @@ DATABASES = {
 }
 
 # ==========================================
-# 4. ARCHIVOS ESTÁTICOS Y MULTIMEDIA (CLOUDINARY)
+# 5. ARCHIVOS ESTÁTICOS Y CLOUDINARY
 # ==========================================
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -79,17 +99,14 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
 }
 
-# Forzamos a que los archivos subidos (MEDIA) usen Cloudinary
+# Forzamos almacenamiento en la nube
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-# Mantenemos WhiteNoise para los archivos estáticos (CSS, JS del admin)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Eliminamos la dependencia de MEDIA_ROOT local para evitar confusión del servidor
-MEDIA_URL = '/media/' 
+MEDIA_URL = '/media/'
 
 # ==========================================
-# 5. REST FRAMEWORK & CORS
+# 6. REST FRAMEWORK & JWT
 # ==========================================
 CORS_ALLOW_ALL_ORIGINS = True
 
