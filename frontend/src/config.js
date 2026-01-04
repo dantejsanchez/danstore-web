@@ -1,16 +1,17 @@
 // frontend/src/config.js
 
-// Detectamos si estamos corriendo en localhost
+// Detectamos si estamos corriendo en localhost (tu PC de desarrollo)
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-// Si es local, usa el puerto 8000. Si no, usa la URL de Render.
+// Si es local, usa localhost:8000. 
+// Si es Oracle, usa tu IP CON EL PUERTO 8000 (¡Esto era lo que faltaba!)
 export const API_URL = isLocal 
     ? 'http://127.0.0.1:8000' 
-    : 'https://danstore-backend.onrender.com';
+    : 'http://129.151.109.180:8000'; 
 
 // Función auxiliar para las imágenes
 export const getImageUrl = (path) => {
     if (!path) return 'https://via.placeholder.com/150';
-    if (path.startsWith('http')) return path; // Ya es una URL completa (Cloudinary)
-    return `${API_URL}${path}`; // Es una ruta relativa (Local/Render)
+    if (path.startsWith('http')) return path; 
+    return `${API_URL}${path}`; 
 };
