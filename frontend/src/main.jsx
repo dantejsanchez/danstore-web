@@ -18,3 +18,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>,
 )
+
+// Actualización forzada para arreglar pantalla blanca
