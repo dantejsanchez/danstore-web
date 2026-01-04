@@ -1,5 +1,5 @@
 """
-Django settings for backend project - VERSIÓN FINAL PRODUCCIÓN
+Django settings for backend project - VERSIÓN PRODUCCIÓN FINAL CORREGIDA
 """
 import os
 from pathlib import Path
@@ -9,7 +9,7 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ==========================================
-# 1. CONFIGURACIÓN DE SEGURIDAD
+# 1. SEGURIDAD
 # ==========================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 DEBUG = True 
@@ -23,10 +23,10 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # ==========================================
-# 2. APLICACIONES (ORDEN CRÍTICO)
+# 2. APLICACIONES
 # ==========================================
 INSTALLED_APPS = [
-    'cloudinary_storage', # Primero para interceptar MEDIA
+    'cloudinary_storage', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,9 +55,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
-# ==========================================
-# 3. TEMPLATES (CORREGIDO PARA EL ADMIN)
-# ==========================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -74,10 +71,11 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'wsgi.application'
+# ESTA ES LA LÍNEA QUE CORREGIMOS:
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ==========================================
-# 4. BASE DE DATOS
+# 3. BASE DE DATOS
 # ==========================================
 DATABASES = {
     'default': {
@@ -87,26 +85,24 @@ DATABASES = {
 }
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS Y CLOUDINARY
+# 4. CLOUDINARY Y ESTÁTICOS
 # ==========================================
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Configuración Maestra de Cloudinary
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dk64vjoit',
     'API_KEY': '694754861946913',
     'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
 }
 
-# Forzamos almacenamiento en la nube
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 
 # ==========================================
-# 6. REST FRAMEWORK & JWT
+# 5. REST & CORS
 # ==========================================
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -126,7 +122,6 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# Configuración básica restante
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
