@@ -1,5 +1,5 @@
 """
-Django settings for backend project.
+Django settings for backend project - VERSIÓN ORACLE CLOUD
 """
 import os
 import dj_database_url
@@ -10,28 +10,31 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ==========================================
-# 1. CONFIGURACIÓN DE SEGURIDAD (CORREGIDA)
+# 1. CONFIGURACIÓN DE SEGURIDAD
 # ==========================================
 
+# ADVERTENCIA: En el futuro, esta clave no debe estar escrita aquí directamente.
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# Mantenlo en True mientras estamos probando
-DEBUG = True
+# IMPORTANTE: En producción (Oracle) esto debe ser False.
+# Si tienes un error 500 y no sabes qué es, cámbialo a True momentáneamente para ver el error.
+DEBUG = False
 
+# Aquí permite tu IP de Oracle y localhost.
+# El '*' permite todo, úsalo solo si tienes problemas de conexión al inicio.
 ALLOWED_HOSTS = ['*']
 
-# ✅ SOLUCIÓN AL ERROR CSRF 403
 CSRF_TRUSTED_ORIGINS = [
-    'http://129.151.109.180',      # Tu IP de Oracle
-    'https://129.151.109.180',     # Por si acaso
-    'http://localhost:5173',       # React Local
-    'http://127.0.0.1:8000',       # Django Local
+    'http://129.151.109.180',      # Tu IP de Oracle (REEMPLAZAR SI CAMBIÓ)
+    'https://129.151.109.180',
+    'http://localhost:5173',
+    'http://127.0.0.1:8000',
 ]
 
-# ✅ ESTA LÍNEA ES OBLIGATORIA PARA NGINX (Evita que Django rechace la petición)
+# Configuración para que Nginx maneje HTTPS y Django se entere
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# ✅ COOKIES PERMISIVAS (Necesario porque usas HTTP puerto 80, no HTTPS)
+# Como aún no tenemos HTTPS activo (el candadito), dejamos esto en False
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 
@@ -59,7 +62,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Vital para estáticos en Oracle
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,11 +95,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # 3. BASE DE DATOS
 # ==========================================
 
+# Usaremos SQLite por defecto para evitar errores de instalación ahora.
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 
@@ -118,25 +122,23 @@ USE_TZ = True
 
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS
+# 5. ARCHIVOS ESTÁTICOS (Vital para que se vea bien la web)
 # ==========================================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-else:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# Whitenoise se encarga de servir los archivos en producción
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ==========================================
-# 6. CORS
+# 6. CORS (Permisos de acceso desde React)
 # ==========================================
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True # Permisivo para evitar errores al inicio
 
 
 # ==========================================
