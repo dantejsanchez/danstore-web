@@ -1,5 +1,5 @@
 """
-Django settings for backend project - VERSIÓN ORACLE CLOUD
+Django settings for backend project - VERSIÓN ORACLE CLOUD CORREGIDA
 """
 import os
 import dj_database_url
@@ -13,28 +13,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 1. CONFIGURACIÓN DE SEGURIDAD
 # ==========================================
 
-# ADVERTENCIA: En el futuro, esta clave no debe estar escrita aquí directamente.
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# IMPORTANTE: En producción (Oracle) esto debe ser False.
-# Si tienes un error 500 y no sabes qué es, cámbialo a True momentáneamente para ver el error.
+# Mantenemos DEBUG en True por ahora para ver errores si ocurren.
 DEBUG = True
 
-# Aquí permite tu IP de Oracle y localhost.
-# El '*' permite todo, úsalo solo si tienes problemas de conexión al inicio.
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://129.151.109.180',      # Tu IP de Oracle (REEMPLAZAR SI CAMBIÓ)
+    'http://129.151.109.180',
     'https://129.151.109.180',
     'http://localhost:5173',
     'http://127.0.0.1:8000',
 ]
 
-# Configuración para que Nginx maneje HTTPS y Django se entere
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# Como aún no tenemos HTTPS activo (el candadito), dejamos esto en False
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 
@@ -55,14 +48,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'corsheaders',
+    'corsheaders',  # <--- IMPORTANTE: Está aquí una sola vez.
     'store',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # <--- VITAL: Debe ir primero.
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Vital para estáticos en Oracle
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -95,7 +88,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # 3. BASE DE DATOS
 # ==========================================
 
-# Usaremos SQLite por defecto para evitar errores de instalación ahora.
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -122,23 +114,21 @@ USE_TZ = True
 
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS (Vital para que se vea bien la web)
+# 5. ARCHIVOS ESTÁTICOS
 # ==========================================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Whitenoise se encarga de servir los archivos en producción
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ==========================================
-# 6. CORS (Permisos de acceso desde React)
+# 6. CORS (Permisos de acceso)
 # ==========================================
 
-CORS_ALLOW_ALL_ORIGINS = True # Permisivo para evitar errores al inicio
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # ==========================================
