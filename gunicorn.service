@@ -1,0 +1,12 @@
+[Unit]
+Description=Gunicorn daemon para DanShop
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/danstore-web
+ExecStart=/home/ubuntu/danstore-web/venv/bin/gunicorn --access-logfile - --workers 3 --bind 127.0.0.1:8000 backend.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
