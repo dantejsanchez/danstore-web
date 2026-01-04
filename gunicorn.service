@@ -5,10 +5,15 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-# Apuntamos a la carpeta raíz del repositorio
 WorkingDirectory=/home/ubuntu/danstore-web
-# Cambiamos 'backend.wsgi' por solo 'wsgi' porque está en la raíz de la carpeta backend
-ExecStart=/home/ubuntu/danstore-web/venv/bin/gunicorn --access-logfile - --workers 3 --bind 127.0.0.1:8000 --pythonpath backend wsgi:application
+# La magia está en el --env y el PYTHONPATH
+Environment="PYTHONPATH=/home/ubuntu/danstore-web/backend"
+ExecStart=/home/ubuntu/danstore-web/venv/bin/gunicorn \
+    --access-logfile - \
+    --workers 3 \
+    --bind 127.0.0.1:8000 \
+    --env DJANGO_SETTINGS_MODULE=settings \
+    wsgi:application
 
 [Install]
 WantedBy=multi-user.target
