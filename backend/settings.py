@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 1. SEGURIDAD
 # ==========================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
-DEBUG = True 
+DEBUG = False 
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
