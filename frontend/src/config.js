@@ -6,8 +6,8 @@ const isLocal = window.location.hostname === "localhost" || window.location.host
 // Si es local, usa localhost:8000. 
 // Si es Oracle, usa tu IP CON EL PUERTO 8000 (¡Esto era lo que faltaba!)
 export const API_URL = isLocal 
-    ? 'http://129.151.109.180' 
-    : 'http://129.151.109.180'; 
+    ? 'https://dansshop.duckdns.org' 
+    : 'https://dansshop.duckdns.org'; 
 
 // Función auxiliar para las imágenes
 export const getImageUrl = (path) => {
