@@ -11,7 +11,7 @@ Environment="PYTHONPATH=/home/ubuntu/danstore-web/backend"
 ExecStart=/home/ubuntu/danstore-web/venv/bin/gunicorn \
     --access-logfile - \
     --workers 3 \
-    --bind 127.0.0.1:8000 \
+    --bind 129.151.109.180 \
     --env DJANGO_SETTINGS_MODULE=settings \
     wsgi:application
 
