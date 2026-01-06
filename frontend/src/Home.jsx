@@ -144,7 +144,7 @@ function Home() {
                    return (
                    <div key={prod.id} className={`${bgColor} ${textColor} relative h-[650px] flex flex-col items-center pt-14 text-center overflow-hidden group`}>
                       
-                      {/* 5. ETIQUETA EN EL GRID (Flotante) */}
+                      {/* 5.. ETIQUETA EN EL GRID (Flotante) */}
                       {prod.label && prod.label !== 'NONE' && (
                           <div className="absolute top-6 left-6 z-20">
                               <span className={`text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase ${getLabelStyle(prod.label)}`}>
