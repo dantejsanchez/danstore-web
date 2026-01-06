@@ -1,5 +1,5 @@
 """
-Django settings for backend project - VERSIÓN FINAL DJANGO 5 (MODERNA + CREDENCIALES)
+Django settings for backend project - VERSIÓN PRODUCCIÓN + LOGIN SOCIAL
 """
 import os
 from pathlib import Path
@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ==========================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# Mantenemos DEBUG = True para verificar que carguen los productos.
+# Mantenemos DEBUG en False porque ya estamos en producción
 DEBUG = False 
 
 ALLOWED_HOSTS = ['*']
@@ -28,10 +28,10 @@ CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 
 # ==========================================
-# 2. APPS (ORDEN CRÍTICO MANTENIDO)
+# 2. APPS
 # ==========================================
 INSTALLED_APPS = [
-    # 1. Apps Prioritarias de Django (El comando collectstatic original vive aquí)
+    # 1. Apps Prioritarias
     'django.contrib.staticfiles', 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -39,16 +39,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
 
-    # 2. Apps de Terceros
-    # AL PONERLO AQUÍ ABAJO, YA NO INTERFIERE CON LOS ESTÁTICOS LOCALES
-    'cloudinary_storage', 
-    'cloudinary',
+    # 2. Apps para Login y API (NUEVAS)
     'rest_framework',
+    'rest_framework.authtoken', # Necesario para dj-rest-auth
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'dj_rest_auth',             # Maneja endpoints de login/registro
+    'allauth',                  # Motor de autenticación social
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',   # Proveedor Google
+    'allauth.socialaccount.providers.facebook', # Proveedor Facebook
+
+    # 3. Apps de Archivos
+    'cloudinary_storage', 
+    'cloudinary',
     'corsheaders',
 
-    # 3. Tus Apps
+    # 4. Tus Apps
     'store',
 ]
 
@@ -60,6 +68,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    # Middleware obligatorio para allauth (NUEVO)
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -93,63 +103,31 @@ DATABASES = {
 }
 
 # ==========================================
-# 4. PASSWORD & IDIOMA
+# 4. CONFIGURACIÓN DE LOGIN (NUEVO)
 # ==========================================
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+
+# Identificador del sitio (Django crea uno por defecto en la BD con ID=1)
+SITE_ID = 1
+
+# Permitir login por email o usuario
+ACCOUNT_AUTHENTICATION_METHOD = 'email' 
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = 'none' # 'optional' o 'mandatory' si configuras servidor de correos
+
+# Autenticación JWT para dj-rest-auth
+REST_USE_JWT = True
+JWT_AUTH_COOKIE = 'my-app-auth' # Opcional: guarda el token en cookie
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend', # Login normal Django
+    'allauth.account.auth_backends.AuthenticationBackend', # Login Social
 ]
-LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
 
-# ==========================================
-# 5. CONFIGURACIÓN DE ALMACENAMIENTO (HÍBRIDA + CREDENCIALES)
-# ==========================================
-
-# A. Credenciales de Cloudinary (¡ESTO ERA LO QUE FALTABA!)
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dk64vjoit',
-    'API_KEY': '694754861946913',
-    'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
-}
-
-# B. Configuración MODERNA (Django 4.2+)
-STORAGES = {
-    # Media (Fotos) -> Cloudinary
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    # Static (Admin) -> Local (Disco Duro)
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-}
-
-# C. Configuración LEGACY (Para compatibilidad)
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
-# Rutas
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [] 
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# ==========================================
-# 6. RESTO DE CONFIGURACIÓN
-# ==========================================
-CORS_ALLOW_ALL_ORIGINS = True
-
+# Configuración REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication', # Usar JWT de la librería
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
@@ -164,3 +142,48 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# ==========================================
+# 5. PASSWORD & IDIOMA
+# ==========================================
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+LANGUAGE_CODE = 'es-es'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+# ==========================================
+# 6. CONFIGURACIÓN DE ALMACENAMIENTO
+# ==========================================
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dk64vjoit',
+    'API_KEY': '694754861946913',
+    'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
+}
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [] 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_ALL_ORIGINS = True
