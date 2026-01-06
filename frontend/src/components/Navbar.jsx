@@ -25,7 +25,7 @@ function Navbar() {
   useEffect(() => {
     if (searchTerm.length > 1) {
       const timer = setTimeout(() => {
-        fetch(`http://129.151.109.180:8000/api/products/?search=${searchTerm}`)
+        fetch(`http://129.151.109.180/api/products/?search=${searchTerm}`)
           .then(res => res.json())
           .then(data => {
             setSuggestions(data.slice(0, 5));
@@ -113,7 +113,7 @@ function Navbar() {
                             }}
                             className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
                         >
-                            <img src={`http://129.151.109.180:8000${prod.image}`} className="w-10 h-10 object-cover rounded-lg bg-gray-100 mix-blend-multiply" alt={prod.name}/>
+                            <img src={`http://129.151.109.180${prod.image}`} className="w-10 h-10 object-cover rounded-lg bg-gray-100 mix-blend-multiply" alt={prod.name}/>
                             <div>
                                 <p className="font-semibold text-gray-900 text-sm">{prod.name}</p>
                                 <p className="text-xs text-gray-400 font-bold uppercase">{prod.category_name || "Producto"}</p>
