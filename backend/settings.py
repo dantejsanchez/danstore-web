@@ -16,9 +16,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba
 # Mantenemos DEBUG en False porque ya estamos en producción
 DEBUG = False 
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['dansshop.duckdns.org', '129.151.109.180', 'localhost']
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://dansshop.duckdns.org',
     'http://129.151.109.180',
     'https://129.151.109.180',
     'http://localhost:5173',
