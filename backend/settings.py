@@ -1,10 +1,10 @@
 """
-Django settings for backend project - VERSIÓN ORACLE CLOUD FINAL
+Django settings for backend project - VERSIÓN ORACLE CLOUD FINAL (CORREGIDA)
 """
 import os
 from pathlib import Path
 from datetime import timedelta
-import dj_database_url  # Se mantiene por si usas Postgres en el futuro
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8)3nl3)x!+54nu+*b7@ba^k5j-6%d-_ek@*@+ao3dz^1gd@_eu')
 
-# Mantenemos DEBUG en True para ver errores si ocurren durante la configuración.
+# Mantenemos DEBUG en True hasta verificar que las fotos carguen.
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
@@ -36,14 +36,14 @@ SESSION_COOKIE_SECURE = False
 # ==========================================
 
 INSTALLED_APPS = [
-    'cloudinary_storage',
+    'cloudinary_storage', # Debe ir antes de django.contrib.staticfiles si queremos que pise media, pero aquí separamos configs.
     'cloudinary',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles', # Necesario para el Admin
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -54,7 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware', # DESACTIVADO: Dejamos que Nginx sirva los estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -106,24 +106,24 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'es-es' # Cambiado a español para el Admin
+LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
 
 # ==========================================
-# 5. ARCHIVOS ESTÁTICOS (CORREGIDO PARA NGINX)
+# 5. ARCHIVOS ESTÁTICOS (PARA EL ADMIN - LOCAL)
 # ==========================================
+# Configuración específica para que Nginx encuentre los estilos en el disco del servidor.
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = []
 
-# Agregamos esto explícitamente vacío para evitar confusiones
-STATICFILES_DIRS = [] 
-
-# Comentamos WhiteNoise storage temporalmente para usar el recolector estándar de Django
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# ¡CORRECCIÓN EXPERTA!: Usamos el storage por defecto de Django.
+# Esto obliga a guardar los archivos en la carpeta local 'staticfiles' y NO subirlos a Cloudinary.
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -136,17 +136,21 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 
 # ==========================================
-# 7. MULTIMEDIA (CLOUDINARY)
+# 7. MULTIMEDIA (FOTOS PRODUCTOS - CLOUDINARY)
 # ==========================================
+# Configuración específica para que las subidas se vayan a la nube.
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
+# Credenciales
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dk64vjoit',
     'API_KEY': '694754861946913',
     'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
 }
 
+# ¡AQUÍ ESTÁ LA MAGIA!: Solo los archivos Media usan Cloudinary.
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Cloudinary maneja sus propias URLs, pero definimos esto por compatibilidad.
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
