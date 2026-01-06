@@ -103,29 +103,27 @@ USE_I18N = True
 USE_TZ = True
 
 # ==========================================
-# 5. CONFIGURACIÓN DE ALMACENAMIENTO (STORAGES)
+# 5. CONFIGURACIÓN DE ALMACENAMIENTO (HÍBRIDA)
 # ==========================================
-# ESTA ES LA PARTE CRÍTICA QUE ARREGLA TODO EN DJANGO 4.2+ Y 5.0
 
+# 1. Configuración MODERNA (Django 4.2 / 5.0)
+# Esto es lo que usa Django realmente.
 STORAGES = {
-    # 1. "default": Gestiona las FOTOS (Media). Lo mandamos a Cloudinary.
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
-    # 2. "staticfiles": Gestiona el ADMIN (CSS/JS). Lo mandamos al Disco Local (para Nginx).
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
-# Credenciales de Cloudinary
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dk64vjoit',
-    'API_KEY': '694754861946913',
-    'API_SECRET': 'oajkHZ8FePPz3o_E5ve2wUvIBB8',
-}
+# 2. Configuración DE COMPATIBILIDAD (Vital para evitar el error)
+# Definimos estas variables antiguas porque la librería 'cloudinary_storage' 
+# las busca explícitamente y crashea si no existen.
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-# Rutas Estáticas y Media
+# Rutas estándar
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = []
