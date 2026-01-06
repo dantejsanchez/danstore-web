@@ -20,8 +20,6 @@ ALLOWED_HOSTS = ['dansshop.duckdns.org', '129.151.109.180', 'localhost']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://dansshop.duckdns.org',
-    'http://129.151.109.180',
-    'https://129.151.109.180',
     'http://localhost:5173',
 ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
