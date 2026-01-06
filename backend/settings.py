@@ -30,7 +30,7 @@ SESSION_COOKIE_SECURE = False
 # 2. APPS
 # ==========================================
 INSTALLED_APPS = [
-    # 1. Apps Prioritarias
+    # 1. Apps Prioritariassudo systemctl status gunicorn
     'django.contrib.staticfiles', 
     'django.contrib.admin',
     'django.contrib.auth',
