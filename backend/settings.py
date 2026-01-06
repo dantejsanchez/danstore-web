@@ -28,23 +28,24 @@ SESSION_COOKIE_SECURE = False
 # 2. APPS
 # ==========================================
 INSTALLED_APPS = [
-    # Apps de terceros para archivos (Orden IMPORTANTE)
-    'cloudinary_storage',
-    'django.contrib.staticfiles',  # Debe ir después de cloudinary_storage
-    'cloudinary',
-
-    # Apps de Django
+    # 1. Apps Prioritarias de Django (El comando collectstatic original vive aquí)
+    'django.contrib.staticfiles', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
 
-    # Tus Apps
+    # 2. Apps de Terceros
+    # AL PONERLO AQUÍ ABAJO, YA NO INTERFIERE CON LOS ESTÁTICOS LOCALES
+    'cloudinary_storage', 
+    'cloudinary',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+
+    # 3. Tus Apps
     'store',
 ]
 
@@ -106,32 +107,29 @@ USE_TZ = True
 # 5. CONFIGURACIÓN DE ALMACENAMIENTO (HÍBRIDA)
 # ==========================================
 
-# 1. Configuración MODERNA (Django 4.2 / 5.0)
-# Esto es lo que usa Django realmente.
+# Configuración MODERNA (Django 4.2+)
 STORAGES = {
+    # Media (Fotos) -> Cloudinary
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
+    # Static (Admin) -> Local (Disco Duro)
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
-# 2. Configuración DE COMPATIBILIDAD (Vital para evitar el error)
-# Definimos estas variables antiguas porque la librería 'cloudinary_storage' 
-# las busca explícitamente y crashea si no existen.
+# Configuración LEGACY (Para compatibilidad con librerías viejas)
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-# Rutas estándar
+# Rutas
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = []
+STATICFILES_DIRS = [] # Déjalo vacío si no tienes carpetas extra
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ==========================================
 # 6. RESTO DE CONFIGURACIÓN
