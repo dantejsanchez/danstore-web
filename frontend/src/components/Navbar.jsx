@@ -82,8 +82,8 @@ function Navbar() {
     {/* Navbar Container */}
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b 
         ${scrolled 
-            ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-2' // Con scroll (lo que te gustaba)
-            : 'bg-white/95 border-transparent py-3' // Arriba (Blanco limpio, adiós al plomo)
+            ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-2' 
+            : 'bg-white/95 border-transparent py-3' 
         }`
     }>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,10 +92,12 @@ function Navbar() {
           
           {/* 1. IZQUIERDA: Botón Sandwich + MARCA */}
           <div className="flex items-center gap-2">
-             {/* BOTÓN SANDWICH (Móvil) */}
+             
+             {/* BOTÓN SANDWICH (VISIBLE EN PC Y MÓVIL) */}
+             {/* Le quité el 'md:hidden' para que salga siempre */}
              <button 
                 onClick={() => setIsOpen(true)}
-                className="md:hidden p-2 -ml-2 rounded-full text-gray-700 hover:bg-black/5 transition-colors"
+                className="p-2 -ml-2 rounded-full text-gray-700 hover:bg-black/5 transition-colors"
              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
              </button>
@@ -107,7 +109,7 @@ function Navbar() {
              </Link>
           </div>
 
-          {/* 2. BUSCADOR (PC) */}
+          {/* 2. BUSCADOR (PC - VISIBLE SOLO EN PC) */}
           <div className="flex-1 max-w-2xl relative hidden md:block">
             <div className="relative group">
                 <input 
@@ -191,12 +193,11 @@ function Navbar() {
                     )}
                 </div>
             ) : (
-                // BOTÓN LOGIN (CAMBIO DE TEXTO)
+                // BOTÓN LOGIN
                 <Link to="/login" className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 text-sm font-bold text-gray-700 hover:text-black hover:border-gray-400 transition-all">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    {/* Texto cambiado como pediste */}
                     <span className="hidden md:inline">Iniciar Sesión</span>
                 </Link>
             )}
@@ -217,7 +218,7 @@ function Navbar() {
           </div>
         </div>
 
-        {/* --- BUSCADOR MÓVIL (OVALADO) --- */}
+        {/* --- BUSCADOR MÓVIL (VISIBLE SOLO EN MÓVIL - OVALADO) --- */}
         <div className="pb-3 md:hidden">
             <div className="relative">
                 <input 
@@ -246,13 +247,16 @@ function Navbar() {
       </div>
     </nav>
 
-    {/* --- SIDEBAR / SANDWICH PROFESIONAL --- */}
+    {/* --- SIDEBAR / MENÚ LATERAL (FUNCIONAL EN PC Y MÓVIL) --- */}
     <div className={`fixed inset-0 z-[60] flex transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
           
+          {/* Fondo oscuro SIMPLE */}
           <div className="absolute inset-0 bg-black/25" onClick={() => setIsOpen(false)}></div>
           
+          {/* Panel Blanco */}
           <div className={`bg-white w-[300px] h-full shadow-2xl transform transition-transform duration-300 flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
 
+              {/* Cabecera */}
               <div className="flex justify-between items-center p-5 border-b border-gray-100">
                   <span className="text-xl font-bold tracking-tight text-gray-900">Menú</span>
                   <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -260,6 +264,7 @@ function Navbar() {
                   </button>
               </div>
 
+              {/* Lista Categorías */}
               <div className="flex-1 overflow-y-auto">
                   <div className="py-2">
                       <Link 
@@ -285,6 +290,7 @@ function Navbar() {
                   </div>
               </div>
               
+              {/* Footer Ayuda */}
               <div className="p-6 border-t border-gray-100 bg-gray-50/50">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Ayuda</p>
                   <div className="space-y-3">
