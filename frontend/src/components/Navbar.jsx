@@ -2,30 +2,46 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 
 function Navbar() {
   const { cart } = useCart();
   const { user, logoutUser } = useAuth();
   const navigate = useNavigate(); 
   
-  // --- LÓGICA DEL BUSCADOR (INTACTA) ---
+  // --- ESTADOS ---
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  // Efecto Scroll
+  
+  // Estados UI
+  const [isOpen, setIsOpen] = useState(false);
+  const [categories, setCategories] = useState([]); 
   const [scrolled, setScrolled] = useState(false);
+
+  // --- EFECTOS ---
+  
+  // 1. Detectar Scroll
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // 2. Cargar Categorías
+  useEffect(() => {
+    fetch(`${API_URL}/api/categories/`)
+      .then(res => res.json())
+      .then(data => setCategories(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  // 3. Buscador Predictivo
   useEffect(() => {
     if (searchTerm.length > 1) {
       const timer = setTimeout(() => {
-        fetch(`https://dansshop.duckdns.org/api/products/?search=${searchTerm}`)
+        fetch(`${API_URL}/api/products/?search=${searchTerm}`)
           .then(res => res.json())
           .then(data => {
             setSuggestions(data.slice(0, 5));
@@ -41,11 +57,11 @@ function Navbar() {
 
   const handleSearch = (term = searchTerm) => {
     setShowSuggestions(false);
+    setIsOpen(false); 
     navigate(`/?search=${term}`);
-    window.location.reload(); 
   };
 
-  // --- LÓGICA DE NOMBRE (Blindada) ---
+  // --- HELPERS USUARIO ---
   const getDisplayName = () => {
       if (!user) return "";
       if (user.name && user.name.trim() !== "") return user.name;
@@ -60,38 +76,45 @@ function Navbar() {
   };
 
   const displayName = getDisplayName();
-  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    // CAMBIO AQUÍ: 
-    // Antes: 'bg-[#D9D9D9]' (Gris sólido feo)
-    // Ahora: 'bg-gray-100/50 backdrop-blur-sm' (Gris sutil translúcido profesional)
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-transparent 
+    <>
+    {/* Navbar Container */}
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b 
         ${scrolled 
-            ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-2' 
-            : 'bg-gray-100/50 backdrop-blur-sm border-gray-100 py-3'
+            ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-2' // Con scroll (lo que te gustaba)
+            : 'bg-white/95 border-transparent py-3' // Arriba (Blanco limpio, adiós al plomo)
         }`
     }>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="flex justify-between items-center gap-8 h-12">
+        <div className="flex justify-between items-center gap-4 md:gap-8 h-12">
           
-          {/* 1. MARCA */}
-          <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
-             <span className="text-2xl font-bold text-gray-900 tracking-tighter">
-               Dan<span className="text-gray-500">Shop</span>
-             </span>
-          </Link>
+          {/* 1. IZQUIERDA: Botón Sandwich + MARCA */}
+          <div className="flex items-center gap-2">
+             {/* BOTÓN SANDWICH (Móvil) */}
+             <button 
+                onClick={() => setIsOpen(true)}
+                className="md:hidden p-2 -ml-2 rounded-full text-gray-700 hover:bg-black/5 transition-colors"
+             >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+             </button>
 
-          {/* 2. BUSCADOR */}
+             <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
+                <span className="text-2xl font-bold text-gray-900 tracking-tighter">
+                  Dan<span className="text-gray-500">Shop</span>
+                </span>
+             </Link>
+          </div>
+
+          {/* 2. BUSCADOR (PC) */}
           <div className="flex-1 max-w-2xl relative hidden md:block">
             <div className="relative group">
                 <input 
                   type="text" 
                   placeholder="Busca tu detalle favorito" 
-                  // Ajuste sutil: Fondo blanco translúcido al inicio para mejor contraste
                   className={`w-full border-transparent focus:border-gray-300 focus:bg-white rounded-full py-2 pl-12 pr-4 text-sm transition-all outline-none shadow-sm focus:ring-4 focus:ring-gray-100 
-                    ${scrolled ? 'bg-gray-100' : 'bg-white/80'}`}
+                    ${scrolled ? 'bg-gray-100' : 'bg-gray-50'}`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -101,19 +124,16 @@ function Navbar() {
                 </svg>
             </div>
 
-            {/* SUGERENCIAS */}
+            {/* SUGERENCIAS PC */}
             {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden py-2 animate-fade-in-up">
+                <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden py-2 animate-fade-in-up z-50">
                     {suggestions.map((prod) => (
                         <div 
                             key={prod.id}
-                            onClick={() => {
-                                navigate(`/product/${prod.id}`);
-                                setShowSuggestions(false);
-                            }}
+                            onClick={() => { navigate(`/product/${prod.id}`); setShowSuggestions(false); }}
                             className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
                         >
-                            <img src={`https://dansshop.duckdns.org${prod.image}`} className="w-10 h-10 object-cover rounded-lg bg-gray-100 mix-blend-multiply" alt={prod.name}/>
+                            <img src={`${API_URL}${prod.image}`} className="w-10 h-10 object-cover rounded-lg bg-gray-100 mix-blend-multiply" alt={prod.name}/>
                             <div>
                                 <p className="font-semibold text-gray-900 text-sm">{prod.name}</p>
                                 <p className="text-xs text-gray-400 font-bold uppercase">{prod.category_name || "Producto"}</p>
@@ -125,7 +145,7 @@ function Navbar() {
           </div>
 
           {/* 3. ICONOS DERECHA */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2 md:space-x-6">
             
             {/* USUARIO */}
             {user ? (
@@ -161,11 +181,7 @@ function Navbar() {
                             </div>
                             <div className="border-t border-gray-100 mt-1 pt-1">
                                 <button 
-                                    onClick={() => {
-                                        logoutUser();
-                                        setShowUserMenu(false);
-                                        navigate('/login');
-                                    }}
+                                    onClick={() => { logoutUser(); setShowUserMenu(false); navigate('/login'); }}
                                     className="w-full text-left px-5 py-2 text-sm text-red-600 font-medium hover:bg-red-50 flex items-center gap-2"
                                 >
                                     Cerrar Sesión
@@ -175,11 +191,13 @@ function Navbar() {
                     )}
                 </div>
             ) : (
+                // BOTÓN LOGIN (CAMBIO DE TEXTO)
                 <Link to="/login" className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 text-sm font-bold text-gray-700 hover:text-black hover:border-gray-400 transition-all">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span>Ingresar</span>
+                    {/* Texto cambiado como pediste */}
+                    <span className="hidden md:inline">Iniciar Sesión</span>
                 </Link>
             )}
 
@@ -197,10 +215,92 @@ function Navbar() {
               </div>
             </Link>
           </div>
+        </div>
 
+        {/* --- BUSCADOR MÓVIL (OVALADO) --- */}
+        <div className="pb-3 md:hidden">
+            <div className="relative">
+                <input 
+                    type="text" 
+                    placeholder="Busca en DanShop..." 
+                    className="w-full bg-gray-100 border border-transparent rounded-full py-2.5 pl-10 pr-4 text-sm focus:bg-white focus:border-gray-300 focus:outline-none shadow-sm transition-all"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+                <svg className="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                
+                {/* Sugerencias Móvil */}
+                {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute top-12 left-0 w-full bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden py-2 z-50">
+                        {suggestions.map((prod) => (
+                            <div key={prod.id} onClick={() => { navigate(`/product/${prod.id}`); setShowSuggestions(false); }} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 active:bg-gray-50">
+                                <img src={`${API_URL}${prod.image}`} className="w-10 h-10 object-cover rounded bg-gray-100" />
+                                <span className="text-sm font-medium text-gray-800">{prod.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
       </div>
     </nav>
+
+    {/* --- SIDEBAR / SANDWICH PROFESIONAL --- */}
+    <div className={`fixed inset-0 z-[60] flex transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+          
+          <div className="absolute inset-0 bg-black/25" onClick={() => setIsOpen(false)}></div>
+          
+          <div className={`bg-white w-[300px] h-full shadow-2xl transform transition-transform duration-300 flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+
+              <div className="flex justify-between items-center p-5 border-b border-gray-100">
+                  <span className="text-xl font-bold tracking-tight text-gray-900">Menú</span>
+                  <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                  <div className="py-2">
+                      <Link 
+                        to="/catalogo" 
+                        onClick={() => setIsOpen(false)} 
+                        className="flex items-center justify-between px-6 py-4 text-gray-800 hover:bg-gray-50 transition-colors group border-b border-gray-50"
+                      >
+                          <span className="font-bold text-base group-hover:text-blue-600">Ver Todo el Catálogo</span>
+                          <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
+                      </Link>
+                      
+                      {categories.map((cat) => (
+                          <Link 
+                              key={cat.id} 
+                              to={`/catalogo?category=${cat.id}`} 
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-6 py-4 text-gray-600 hover:bg-gray-50 transition-colors group border-b border-gray-50"
+                          >
+                              <span className="font-medium text-base group-hover:text-black">{cat.name}</span>
+                              <svg className="w-4 h-4 text-gray-300 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
+                          </Link>
+                      ))}
+                  </div>
+              </div>
+              
+              <div className="p-6 border-t border-gray-100 bg-gray-50/50">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Ayuda</p>
+                  <div className="space-y-3">
+                    <Link to="/contacto" className="flex items-center gap-3 text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Contacto
+                    </Link>
+                    <Link to="/faq" className="flex items-center gap-3 text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Preguntas Frecuentes
+                    </Link>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </>
   );
 }
 
