@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import Navbar from './components/Navbar'
+import Navbar from './components/Navbar' // Asegúrate que la ruta sea correcta
 import { API_URL, getImageUrl } from './config';
 
 function Catalog() {
@@ -185,8 +185,8 @@ function Catalog() {
                                                 : 'text-gray-600 hover:text-black hover:bg-gray-50'
                                             }`}
                                     >
-                                        {cat.name}
-                                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[#0071e3]"></div>}
+                                            {cat.name}
+                                            {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[#0071e3]"></div>}
                                     </button>
                                 </li>
                             )
@@ -196,7 +196,6 @@ function Catalog() {
 
                 {/* 2. Marcas */}
                 <div className="bg-white p-5 rounded-lg shadow-sm mb-4 border border-gray-100 hidden"> 
-                   {/* Oculto según tu código anterior de referencia "sin servicios", pero si quieres mantenerlo visible, quita el 'hidden' */}
                    <h3 className="font-bold text-gray-900 mb-3 text-lg">Servicios</h3>
                    {/* ... lógica de marcas original ... */}
                 </div>
@@ -226,7 +225,7 @@ function Catalog() {
                 </div>
             </aside>
 
-            {/* --- GRID DE PRODUCTOS (TU CÓDIGO ORIGINAL INTACTO) --- */}
+            {/* --- GRID DE PRODUCTOS (MODIFICADO A 2 COLUMNAS) --- */}
             <main className="flex-1">
                 <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex justify-between items-center border border-gray-100">
                     <h1 className="text-xl font-bold">
@@ -243,42 +242,48 @@ function Catalog() {
                         <button onClick={handleReset} className="text-[#0071e3] font-bold underline">Ver todo el catálogo</button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    /* AQUÍ ESTÁ EL CAMBIO: grid-cols-2 */
+                    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4">
                         {products.map((product) => (
-                        <Link to={`/product/${product.id}`} key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all p-4 relative group border border-transparent hover:border-gray-200">
+                        <Link 
+                            to={`/product/${product.id}`} 
+                            key={product.id} 
+                            /* AQUÍ: Padding reducido en móvil (p-2) para que quepa bien */
+                            className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all p-2 md:p-4 relative group border border-transparent hover:border-gray-200"
+                        >
                             
                             {/* Etiquetas Dinámicas */}
                             {product.label && product.label !== 'NONE' && (
-                                <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-1 rounded z-10 ${getLabelStyle(product.label)}`}>
+                                <span className={`absolute top-2 left-2 text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded z-10 ${getLabelStyle(product.label)}`}>
                                     {product.label_display || product.label}
                                 </span>
                             )}
 
-                            <div className="aspect-square bg-gray-100 mb-4 overflow-hidden rounded-md">
+                            <div className="aspect-square bg-gray-100 mb-2 md:mb-4 overflow-hidden rounded-md">
                                 <img src={getImageUrl(product.image)} alt={product.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"/>
                             </div>
 
                             <div>
-                                <p className="text-xs text-gray-500 font-bold uppercase mb-1">{product.brand}</p>
-                                <h3 className="text-sm text-gray-700 font-medium leading-tight mb-2 h-10 overflow-hidden">{product.name}</h3>
+                                <p className="text-[10px] md:text-xs text-gray-500 font-bold uppercase mb-1">{product.brand}</p>
+                                <h3 className="text-xs md:text-sm text-gray-700 font-medium leading-tight mb-2 h-8 md:h-10 overflow-hidden">{product.name}</h3>
                                 
                                 {product.original_price && parseFloat(product.original_price) > parseFloat(product.price) && (
-                                    <div className="text-xs text-gray-400 line-through">
+                                    <div className="text-[10px] md:text-xs text-gray-400 line-through">
                                         S/ {product.original_price}
                                     </div>
                                 )}
                                 
                                 <div className="flex items-center gap-2">
-                                    <span className="text-lg font-bold text-red-600">S/ {product.price}</span>
+                                    <span className="text-sm md:text-lg font-bold text-red-600">S/ {product.price}</span>
                                     {product.original_price && parseFloat(product.original_price) > parseFloat(product.price) && (
-                                        <span className="text-xs font-bold text-red-600 bg-red-100 px-1 rounded">
+                                        <span className="text-[9px] md:text-xs font-bold text-red-600 bg-red-100 px-1 rounded">
                                             -{calculateDiscount(product.original_price, product.price)}%
                                         </span>
                                     )}
                                 </div>
 
                                 <div className="mt-2 flex items-center gap-1">
-                                    <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded border border-green-100">
+                                    <span className="text-green-600 text-[9px] md:text-xs font-bold bg-green-50 px-1 md:px-2 py-0.5 rounded border border-green-100">
                                         Llega mañana
                                     </span>
                                 </div>
