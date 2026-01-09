@@ -19,6 +19,12 @@ function Navbar() {
   const [categories, setCategories] = useState([]); 
   const [scrolled, setScrolled] = useState(false);
 
+  // --- LÓGICA PARA OCULTAR CATEGORÍAS ---
+  // Agrega aquí las rutas donde NO quieres que salga la barra de categorías
+  const rutasOcultas = ['/login', '/registro', '/checkout', '/pago','/cart'];
+  // Verificamos si la ruta actual está en la lista de ocultas
+  const mostrarCategorias = !rutasOcultas.includes(location.pathname);
+
   // --- EFECTOS ---
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -172,23 +178,25 @@ function Navbar() {
       </div>
 
       {/* --- FILA INFERIOR: CATEGORÍAS (INTEGRADO) --- */}
-      {/* Esta es la clave: Al estar DENTRO del <nav>, nunca se separará */}
-      <div className="w-full border-t border-gray-100 overflow-x-auto no-scrollbar bg-white">
-          <div className="max-w-[1400px] mx-auto px-4 flex items-center gap-6 h-[48px] whitespace-nowrap">
-                <Link to="/catalogo" className="text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors flex items-center gap-1">
-                    Ver Todo
-                </Link>
-                {categories.map((cat) => (
-                    <Link 
-                        key={cat.id} 
-                        to={`/catalogo?category=${cat.id}`} 
-                        className="text-[13px] text-gray-600 hover:text-blue-600 font-medium transition-colors"
-                    >
-                        {cat.name}
-                    </Link>
-                ))}
-          </div>
-      </div>
+      {/* CORRECCIÓN: Ahora esto está envuelto en una condición para ocultarse en login/checkout */}
+      {mostrarCategorias && (
+        <div className="w-full border-t border-gray-100 overflow-x-auto no-scrollbar bg-white">
+            <div className="max-w-[1400px] mx-auto px-4 flex items-center gap-6 h-[48px] whitespace-nowrap">
+                  <Link to="/catalogo" className="text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors flex items-center gap-1">
+                      Ver Todo
+                  </Link>
+                  {categories.map((cat) => (
+                      <Link 
+                          key={cat.id} 
+                          to={`/catalogo?category=${cat.id}`} 
+                          className="text-[13px] text-gray-600 hover:text-blue-600 font-medium transition-colors"
+                      >
+                          {cat.name}
+                      </Link>
+                  ))}
+            </div>
+        </div>
+      )}
     </nav>
 
     {/* --- SIDEBAR / MENÚ LATERAL --- */}
